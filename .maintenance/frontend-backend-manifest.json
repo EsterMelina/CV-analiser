@@ -1,0 +1,294 @@
+﻿[
+    {
+        "path":  ".env.example",
+        "sha256":  "3D8106268028594A941674613CAFF7069EBC239ED40004207D1BCC77925C679D"
+    },
+    {
+        "path":  ".gitignore",
+        "sha256":  "002899FF39D2229E61463ACDD07FF58A4A75B0909EC99070D7DDC02226554021"
+    },
+    {
+        "path":  "docker-compose.yml",
+        "sha256":  "9F293DBC46647BC295439E59E85CEEF0252BD99371A9870F70DF91AA48982D71"
+    },
+    {
+        "path":  "pytest.ini",
+        "sha256":  "B160D82F7811555051F8966D8E02750A985227C1D022208C784E606946F2EADA"
+    },
+    {
+        "path":  "README.md",
+        "sha256":  "FBDE3AE8DE5F28511BD5347B9961687B23747387532385B92F0583D2633207C4"
+    },
+    {
+        "path":  "requirements.txt",
+        "sha256":  "0A124A14B9CE20FC6A5AB76FE1757CEFDD41289645BD697D74E28A9B8F0E3DC9"
+    },
+    {
+        "path":  "app\\main.py",
+        "sha256":  "23E47C04BD568A9F66F0C8FF5202F20ED35DCBE579232142D36845401D904D3B"
+    },
+    {
+        "path":  "app\\seed.py",
+        "sha256":  "02AF5182AAF2ED13FD72BC979AC2E9D18C6CAA16B12E9B9F51CE6318BC3B9221"
+    },
+    {
+        "path":  "app\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "app\\api\\analysis.py",
+        "sha256":  "022B4A28425CE212075FCCE596376C0F8ECA86A4CD2C2D4DA24A551EE4092B62"
+    },
+    {
+        "path":  "app\\api\\auth.py",
+        "sha256":  "E027631D547EEE332A7F35B5D82E7EC0CEFA5BD1BA0A0985E1A41F90E07B38C3"
+    },
+    {
+        "path":  "app\\api\\candidates.py",
+        "sha256":  "F1600A7AC525741FC155A0AD3DD61AD403D704FCAF23861CD7BEB208B340CCC4"
+    },
+    {
+        "path":  "app\\api\\companies.py",
+        "sha256":  "5A2A92C08CFE95DCC8BA34E28FCAF5BB2625CB240BFCAEADD06A7AEC057F22BD"
+    },
+    {
+        "path":  "app\\api\\dashboard.py",
+        "sha256":  "8D7DA30793A9164E838F7A5FFFE78AE76536F6D52451CF5C7DAA3D578ABE3E7F"
+    },
+    {
+        "path":  "app\\api\\deps.py",
+        "sha256":  "2337A58AE8B4564BE96B64141F895AD3CAC441FAD3EA241FBE3468DF4E941016"
+    },
+    {
+        "path":  "app\\api\\email.py",
+        "sha256":  "441D23B8DB3727251503311A360DEBA294CA924520D7970EC18A2211792F4D0D"
+    },
+    {
+        "path":  "app\\api\\interviews.py",
+        "sha256":  "177174AECF1431AB9E2F24677D842770859AE72D44CE0CC192669BA6EAB4C2D4"
+    },
+    {
+        "path":  "app\\api\\jobs.py",
+        "sha256":  "BB31200F27291303EE6E8C40F0D2A349941F5A998AD7F7AA8B780EFC6BF98D53"
+    },
+    {
+        "path":  "app\\api\\job_requirements.py",
+        "sha256":  "4BE91E3A319DABA7177169F0215E4CAF7B75D6EE4920A427F12D0F94883BE3D9"
+    },
+    {
+        "path":  "app\\api\\processing_logs.py",
+        "sha256":  "5B6A539EF80ACE99BD71A0AC2E8C33821E4EC6A32DA9D897B2AEA1750AF002BD"
+    },
+    {
+        "path":  "app\\api\\users.py",
+        "sha256":  "441703F41C2A2B770382AE5EAE138CDADF50F7E5204F38BABC51E5297B17FAE4"
+    },
+    {
+        "path":  "app\\api\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "app\\core\\config.py",
+        "sha256":  "92B10B1516152B6178A17816BEAEC9A91A2E988BB0F6B2723FF69BAD2DC241F9"
+    },
+    {
+        "path":  "app\\core\\crypto.py",
+        "sha256":  "8BC1254D22D85F342EB188D2CA08F723883B5DC6A58733EE70D27A609E409F3C"
+    },
+    {
+        "path":  "app\\core\\database.py",
+        "sha256":  "7117D58853DA0300047445C6AFDA80AA608474176CC02C9E9DDC9C81FBD7FB9E"
+    },
+    {
+        "path":  "app\\core\\security.py",
+        "sha256":  "B92BD91B26A9406390E1A2B2CC463B8C5536D3975D0C160E7FBFC1BBFCB740D2"
+    },
+    {
+        "path":  "app\\core\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "app\\integrations\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "app\\integrations\\email\\base.py",
+        "sha256":  "850B2F4E2DD0F9659C98A0531670B8D8EE43E5D40ACDD8973F4B2FDE7388ABE0"
+    },
+    {
+        "path":  "app\\integrations\\email\\factory.py",
+        "sha256":  "30F995C9F375FB87B82F328F8ABFFE21FDE830955B2D4473F0E3D06EE8D009EE"
+    },
+    {
+        "path":  "app\\integrations\\email\\imap_provider.py",
+        "sha256":  "525D138F99D8BE78E803192AA9422EFA26A370CCB47084FDBB2081BA9AF3F12C"
+    },
+    {
+        "path":  "app\\integrations\\email\\oauth_providers.py",
+        "sha256":  "A67965D5F30818E4672F6250619CCBC41402DD974BF6F258AE50C3C17A2034E5"
+    },
+    {
+        "path":  "app\\integrations\\email\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "app\\models\\application.py",
+        "sha256":  "29AA5AFA3896E9FC45C136B0DA09DEE6A36C149288A5B82AAB82B66A1A8F28F8"
+    },
+    {
+        "path":  "app\\models\\candidate.py",
+        "sha256":  "0D535560DF5D270D66ACDEB26F87314FFE3CF164268DDF87D415B4882AFC0DF6"
+    },
+    {
+        "path":  "app\\models\\candidate_profile.py",
+        "sha256":  "77AECCBDECB8559774C41CDF5703AD24124B8615782F1959A1DEE0FDFD4C943C"
+    },
+    {
+        "path":  "app\\models\\company.py",
+        "sha256":  "140DDC8E5E4CB46828AD9F5DF2B9E7035A24E3855D67365A671E64BCE59D5C79"
+    },
+    {
+        "path":  "app\\models\\email_integration.py",
+        "sha256":  "5712DD81DD137AE4422979B28612154B32521A8955D838E585E77A06B3DAB9CB"
+    },
+    {
+        "path":  "app\\models\\interview.py",
+        "sha256":  "EE1E6800ED9E7746137FCA659DAD8D4775BF3FCD3B9D507D4331CFA177523FF1"
+    },
+    {
+        "path":  "app\\models\\job.py",
+        "sha256":  "417C7A8E9FF3A98E904E053C7B572A673E54194DD4A40FB41DA1C0AF66A479DD"
+    },
+    {
+        "path":  "app\\models\\job_requirement.py",
+        "sha256":  "2E14A9E580803F86D800973C430F4F931D883B69D5DC947C3414E08D60AE6686"
+    },
+    {
+        "path":  "app\\models\\processing_log.py",
+        "sha256":  "C73F25912DEA2CE679EA7D4FC7E655902B8405B59DDE476A791EB69430E08F7B"
+    },
+    {
+        "path":  "app\\models\\user.py",
+        "sha256":  "1AC9FB55B941BCD6EF214782CC8C257CD88A31B45597B99C2B448C4E2BA56656"
+    },
+    {
+        "path":  "app\\models\\__init__.py",
+        "sha256":  "005BB57362342A8604504B307D002D8E4C24D1F526D3AA6BF461208A577C5234"
+    },
+    {
+        "path":  "app\\schemas\\analysis.py",
+        "sha256":  "67215766B9AA86EE18C0DBFE5879E86944CB384A845231A376C6E7D25B826E3B"
+    },
+    {
+        "path":  "app\\schemas\\auth.py",
+        "sha256":  "13091FC660A5BBA4BBDA5C5D263A3119DB28E27F784B496D06B022112FC3177D"
+    },
+    {
+        "path":  "app\\schemas\\candidate.py",
+        "sha256":  "CE2F14E82558CE117BF9DD042462D02B3F562837012A389A5AF46011403A9AC5"
+    },
+    {
+        "path":  "app\\schemas\\dashboard.py",
+        "sha256":  "D6113027526FAB57BCC2C9DCE314BE3F32E0904B2A1CA29A6393BAD77143FF37"
+    },
+    {
+        "path":  "app\\schemas\\email.py",
+        "sha256":  "0F62F085F7E8BE8317A87E7ADE3F9A0BBD85C04364C4C4B5188911AA8F8A3C1D"
+    },
+    {
+        "path":  "app\\schemas\\interview.py",
+        "sha256":  "B62D6D3BBE4B6CC1A273C6436B2434BF7F6DF26886E740A8FF2848601DC22A6D"
+    },
+    {
+        "path":  "app\\schemas\\job.py",
+        "sha256":  "45F98119DEB13FC08B4C5590AD973357967E3B569AD50A6EA6A5074AE5534D88"
+    },
+    {
+        "path":  "app\\schemas\\job_requirement.py",
+        "sha256":  "7D59DE981694ECF0AB0224EFD4B7B1D67E184EC1370FF99B00B92D716B800570"
+    },
+    {
+        "path":  "app\\schemas\\processing_log.py",
+        "sha256":  "5793CFD9BDB433E8FE00DDCDFB54711751C2E004E9E2F5D2B6F802CC6C5152FB"
+    },
+    {
+        "path":  "app\\schemas\\user.py",
+        "sha256":  "7432E975DE23C9E6ED38B8C1C835733A8EBC9B092CD333A120C7C7C5C4BE8646"
+    },
+    {
+        "path":  "app\\schemas\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "app\\services\\analysis_service.py",
+        "sha256":  "ACB9B68B3BBACC87CBA70786045E46E9B5310A83297C14A1DF2901D509AC7E1A"
+    },
+    {
+        "path":  "app\\services\\email_sync_service.py",
+        "sha256":  "ED1C132CE4E1297B61F69DF729E230CFEFB37C66BA552F70FF13D74174A6C759"
+    },
+    {
+        "path":  "app\\services\\embeddings.py",
+        "sha256":  "1B420BDCD161D2C3971EA020E4ED06A4706E3A25F63ED174B05E47E6FA4179DF"
+    },
+    {
+        "path":  "app\\services\\matching_engine.py",
+        "sha256":  "55BA61CA29C2C04502C907E120013EAD79D1895B4DCD45497066A0012B4D40AA"
+    },
+    {
+        "path":  "app\\services\\nlp_extraction.py",
+        "sha256":  "6E50FA108FCA52B73F133520705E274FA8145EB83A3C38EA636D6AEFBB07FEFA"
+    },
+    {
+        "path":  "app\\services\\text_extraction.py",
+        "sha256":  "68B1DAB08107CCCF7FBD1C22680CDA7A2A38B1BA2C984A20F01A7C467E5034B7"
+    },
+    {
+        "path":  "app\\services\\__init__.py",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "path":  "tests\\conftest.py",
+        "sha256":  "8913E7327F6D8A76CEC63AFF3BA49264571E16797F740B3E29BDB64C9B496127"
+    },
+    {
+        "path":  "tests\\test_analysis_integration.py",
+        "sha256":  "E382FC7AC8C0CE933F2008516769E4E34F73048FC592543076C775BEF2640CCD"
+    },
+    {
+        "path":  "tests\\test_auth.py",
+        "sha256":  "4C4480418F4FD476D1B99A46A510B4E2886E4030448D5C274A561833AE3304BA"
+    },
+    {
+        "path":  "tests\\test_candidates.py",
+        "sha256":  "3EA183ACC30E6AF1B6D2C9A800F60C36180CEA7EFA9CF5FB8846DA08EBB7DB07"
+    },
+    {
+        "path":  "tests\\test_dashboard.py",
+        "sha256":  "3C7F32FF3AFF8155C107317879736F517291121A71140621A42A89003C7CBF5D"
+    },
+    {
+        "path":  "tests\\test_email_integration.py",
+        "sha256":  "49175645CAFA55E41F2C3F3BAE356BBEC90DEF3FD9A36DB96B701AA188B5A533"
+    },
+    {
+        "path":  "tests\\test_interviews.py",
+        "sha256":  "841A74FD3B9110A0C259A91BEEC6E330C92975092FCADECB8BF8F14B5CE55DB0"
+    },
+    {
+        "path":  "tests\\test_jobs.py",
+        "sha256":  "A8F9BB2D85FA47C07000FC6DC85DFC34F367F778057A68D7F3D475EF52714421"
+    },
+    {
+        "path":  "tests\\test_matching_engine.py",
+        "sha256":  "B888EE48F0507C118B2C8272FB430D18F38B6DC565FD8D0663724E8A4892812D"
+    },
+    {
+        "path":  "tests\\test_nlp_extraction.py",
+        "sha256":  "4CF02F4CFEE4CB2627D89C3EDDA062F4554C731E7396D41E3F9100AE70F21AE9"
+    },
+    {
+        "path":  "tests\\test_processing_logs.py",
+        "sha256":  "9C37D3A8BADB61C1CBB72A79510AB9261C753AD6D8286EDC876BDD308A2FAD52"
+    }
+]

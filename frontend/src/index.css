@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+
+@layer base {
+  body { @apply font-sans antialiased; }
+  h1, h2, h3 { @apply tracking-tight; }
+  h1 { @apply font-semibold; }
+  button { @apply transition-colors; }
+  button:disabled { @apply cursor-not-allowed opacity-50; }
+  button:not([class]), .questionnaire-editor button { @apply rounded border border-line bg-surface px-3 py-2 text-sm font-medium text-brand-dark; }
+  button:not([class]):hover:enabled, .questionnaire-editor button:hover:enabled { @apply bg-brand-soft; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea { @apply max-w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink; }
+  input[type="checkbox"], input[type="radio"] { accent-color: #456786; }
+  textarea { @apply min-h-24; }
+  select { @apply ml-1; }
+  fieldset { @apply min-w-0 rounded-lg border-line; }
+  legend { @apply px-2 text-sm font-semibold text-ink; }
+  label { @apply text-sm; }
+  summary { @apply cursor-pointer text-sm font-medium; }
+  [role="alert"] { @apply rounded border border-danger/20 bg-danger-soft p-3 text-sm text-danger; }
+  thead { @apply bg-canvas; }
+}
+
+@layer components {
+  .questionnaire-editor > details > fieldset { @apply bg-canvas p-5; }
+  .questionnaire-editor > details > fieldset label { @apply inline-flex flex-wrap items-center gap-2; }
+  .questionnaire-editor input[type="number"] { @apply w-20; }
+  .questionnaire-editor textarea { @apply block w-full mt-1; }
+  .questionnaire-editor > div > a { @apply self-center text-sm font-medium text-brand hover:underline; }
+}
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: #F4F6F9;
+  color: #243247;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #DFE5ED transparent;
+}
+
+:focus-visible {
+  outline: 2px solid #456786;
+  outline-offset: 2px;
+}
+
+.questionnaire-sheet { max-width: 190mm; margin: 1rem auto; padding: 10mm; background: white; color: black; }
+.questionnaire-sheet h1 { font-size: 22pt; }
+.questionnaire-sheet h2 { font-size: 16pt; margin: 1rem 0; }
+.questionnaire-sheet ol { list-style: decimal; padding-left: 1.5rem; }
+.questionnaire-sheet ol ol { list-style: upper-alpha; }
+.print-question { margin: 1rem 0 2rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.answer-space { height: 35mm; border-bottom: 1px solid #bbb; }
+@media print {
+  @page { size: A4; margin: 15mm; }
+  html, body, #root { height: auto; background: white; }
+  .no-print { display: none !important; }
+  .questionnaire-sheet { margin: 0; padding: 0; max-width: none; }
+  .print-question { break-inside: avoid; }
+  .print-question h3 { break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
+}
