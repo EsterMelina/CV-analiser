@@ -1,0 +1,23 @@
+/* ============================================================
+   SIR — Badge de estado da análise
+   ============================================================ */
+
+.asb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Estado por variante — aplicado via classe adicional */
+.asb--neutral  { background: rgba(11, 28, 48, 0.05); color: var(--sir-on-surface-variant); }
+.asb--info     { background: #eff6ff; color: #1e40af; }
+.asb--running  { background: #eff6ff; color: #1e40af; }
+.asb--success  { background: #ecfdf5; color: #065f46; }
+.asb--warning  { background: #fffbeb; color: #92400e; }
+.asb--danger   { background: #fef2f2; color: #991b1b; }

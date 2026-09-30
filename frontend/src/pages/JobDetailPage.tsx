@@ -13,13 +13,9 @@ import type {
   RankingItem,
   RequirementCategory,
 } from "@/types";
+import "./JobDetail.css";
 
-type Tab =
-  | "overview"
-  | "requirements"
-  | "candidates"
-  | "ranking"
-  | "questionnaire";
+type Tab = "overview" | "requirements" | "candidates" | "ranking" | "questionnaire";
 
 const CATEGORY_LABELS: Record<RequirementCategory, string> = {
   education: "Formação",
@@ -46,32 +42,30 @@ export function JobDetailPage() {
 
   const publishMutation = useMutation({
     mutationFn: () => api.post(`/jobs/${jobId}/publish`),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
   });
   const closeMutation = useMutation({
     mutationFn: () => api.post(`/jobs/${jobId}/close`),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
   });
 
-  if (!job) return <p className="text-ink-faint text-sm">A carregar...</p>;
+  if (!job) return <p className="jd-card__state">A carregar...</p>;
 
   return (
-    <div>
-      <div className="flex items-start justify-between mb-6">
+    <div className="job-detail">
+      <div className="job-detail__header">
         <div>
-          <h1 className="font-display text-2xl text-ink mb-1">{job.title}</h1>
-          <p className="text-ink-soft text-sm">
+          <h1 className="job-detail__title">{job.title}</h1>
+          <p className="job-detail__subtitle">
             {job.code} · {job.department ?? "Sem departamento"} ·{" "}
             {job.location ?? "Sem localização"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="job-detail__actions">
           {job.status === "draft" && (
             <button
               onClick={() => publishMutation.mutate()}
-              className="rounded-sm bg-brand text-white px-4 py-2 text-sm font-medium hover:bg-brand-dark transition-colors"
+              className="jd-btn jd-btn--primary"
             >
               Publicar vaga
             </button>
@@ -79,49 +73,39 @@ export function JobDetailPage() {
           {job.status === "published" && (
             <button
               onClick={() => closeMutation.mutate()}
-              className="rounded-sm border border-line px-4 py-2 text-sm font-medium text-ink-soft hover:bg-canvas transition-colors"
+              className="jd-btn jd-btn--secondary"
             >
               Encerrar vaga
             </button>
           )}
         </div>
       </div>
+
       {publishMutation.isError && (
-        <p className="text-sm text-danger bg-danger-soft rounded-sm px-3 py-2 mb-4">
-          {apiErrorMessage(
-            publishMutation.error,
-            "Não foi possível publicar a vaga.",
-          )}
+        <p className="job-detail__error">
+          {apiErrorMessage(publishMutation.error, "Não foi possível publicar a vaga.")}
         </p>
       )}
 
-      <div className="flex gap-1 border-b border-line mb-6">
-        {(
-          [
-            ["overview", "Visão geral"],
-            ["requirements", "Requisitos"],
-            ["candidates", "Candidatos"],
-            ["ranking", "Ranking"],
-            ["questionnaire", "Questionário"],
-          ] as [Tab, string][]
-        ).map(([value, label]) => (
+      <div className="job-detail__tabs">
+        {([
+          ["overview", "Visão geral"],
+          ["requirements", "Requisitos"],
+          ["candidates", "Candidatos"],
+          ["ranking", "Ranking"],
+          ["questionnaire", "Questionário"],
+        ] as [Tab, string][]).map(([value, label]) => (
           <button
             key={value}
             onClick={() => {
               if (
                 !questionnaireDirty ||
                 value === tab ||
-                window.confirm(
-                  "Descartar alterações não guardadas do questionário?",
-                )
+                window.confirm("Descartar alterações não guardadas do questionário?")
               )
                 setTab(value);
             }}
-            className={`px-4 py-2 text-sm border-b-2 -mb-px transition-colors ${
-              tab === value
-                ? "border-brand text-ink font-medium"
-                : "border-transparent text-ink-soft hover:text-ink"
-            }`}
+            className={`job-detail__tab ${tab === value ? "is-active" : ""}`}
           >
             {label}
           </button>
@@ -133,23 +117,24 @@ export function JobDetailPage() {
       {tab === "candidates" && <CandidatesTab jobId={jobId!} />}
       {tab === "ranking" && <RankingTab jobId={jobId!} />}
       {tab === "questionnaire" && (
-        <QuestionnaireEditor
-          key={job.id}
-          job={job}
-          onDirty={setQuestionnaireDirty}
-        />
+        <QuestionnaireEditor key={job.id} job={job} onDirty={setQuestionnaireDirty} />
       )}
     </div>
   );
 }
 
+/* ===================== Overview ===================== */
+
 function OverviewTab({ job }: { job: JobDetail }) {
   const [editing, setEditing] = useState(false);
   const queryClient = useQueryClient();
+
   if (editing)
     return (
       <>
-        <button onClick={() => setEditing(false)}>Cancelar edição</button>
+        <button className="jd-btn jd-btn--secondary" onClick={() => setEditing(false)}>
+          Cancelar edição
+        </button>
         <JobCreatePage
           job={job}
           onSaved={() => {
@@ -159,29 +144,37 @@ function OverviewTab({ job }: { job: JobDetail }) {
         />
       </>
     );
+
   return (
-    <div className="bg-surface border border-line rounded-lg p-6 space-y-4">
-      <button onClick={() => setEditing(true)} className="text-brand">
+    <div className="jd-card">
+      <button className="jd-btn jd-btn--ghost" onClick={() => setEditing(true)}>
         Editar vaga
       </button>
-      <p>Versão dos critérios: {job.criteria_version}</p>
-      <div>
-        <h3 className="text-sm text-ink-soft mb-1">Descrição</h3>
-        <p className="text-ink whitespace-pre-wrap">{job.description}</p>
+
+      <p className="jd-overview__label" style={{ marginTop: "0.5rem" }}>
+        Versão dos critérios: <span className="jd-overview__value">{job.criteria_version}</span>
+      </p>
+
+      <div style={{ marginTop: "1rem" }}>
+        <h3 className="jd-overview__section-title">Descrição</h3>
+        <p className="jd-overview__description">{job.description}</p>
       </div>
-      <div className="grid grid-cols-2 gap-4 text-sm">
+
+      <div className="jd-overview__metric">
         <div>
-          <span className="text-ink-soft">Experiência mínima:</span>{" "}
-          {job.min_experience_years} ano(s)
+          <span className="jd-overview__label">Experiência mínima: </span>
+          <span className="jd-overview__value">{job.min_experience_years} ano(s)</span>
         </div>
         <div>
-          <span className="text-ink-soft">Formação:</span>{" "}
-          {job.education_level ?? "Não especificada"}
+          <span className="jd-overview__label">Formação: </span>
+          <span className="jd-overview__value">{job.education_level ?? "Não especificada"}</span>
         </div>
       </div>
     </div>
   );
 }
+
+/* ===================== Requirements ===================== */
 
 function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
   const queryClient = useQueryClient();
@@ -217,33 +210,25 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (requirementId: number) =>
-      api.delete(`/requirements/${requirementId}`),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
+    mutationFn: (requirementId: number) => api.delete(`/requirements/${requirementId}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
   });
 
   const totalWeight = job.requirements.reduce((sum, r) => sum + r.weight, 0);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-ink-soft">
+      <div className="jd-card__toolbar">
+        <p className="jd-overview__label">
           Soma dos pesos:{" "}
-          <span
-            className={
-              Math.abs(totalWeight - 1) > 0.01
-                ? "text-warn font-medium"
-                : "text-ink"
-            }
-          >
+          <span className={Math.abs(totalWeight - 1) > 0.01 ? "jd-warning" : "jd-overview__value"}>
             {(totalWeight * 100).toFixed(0)}%
           </span>
           {Math.abs(totalWeight - 1) > 0.01 && " — o ideal é somar 100%"}
         </p>
         <button
+          className="jd-btn jd-btn--ghost"
           onClick={() => setShowForm((v) => !v)}
-          className="text-sm text-brand hover:text-brand-dark font-medium"
         >
           {showForm ? "Cancelar" : "+ Adicionar requisito"}
         </button>
@@ -255,28 +240,26 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
             e.preventDefault();
             addMutation.mutate();
           }}
-          className="bg-surface border border-line rounded-lg p-4 mb-4 grid grid-cols-4 gap-3 items-end"
+          className="jd-form"
         >
-          <label className="col-span-2 text-sm">
-            <span className="block text-ink-soft mb-1">Nome</span>
+          <label className="jd-field jd-field--span-2">
+            <span>Nome</span>
             <input
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-sm border border-line px-3 py-2 text-sm"
+              className="jd-input"
             />
           </label>
-          <label className="text-sm">
-            <span className="block text-ink-soft mb-1">Categoria</span>
+
+          <label className="jd-field">
+            <span>Categoria</span>
             <select
               value={form.category}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  category: e.target.value as RequirementCategory,
-                })
+                setForm({ ...form, category: e.target.value as RequirementCategory })
               }
-              className="w-full rounded-sm border border-line px-3 py-2 text-sm"
+              className="jd-select"
             >
               {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -285,45 +268,43 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
               ))}
             </select>
           </label>
-          <label className="text-sm">
-            <span className="block text-ink-soft mb-1">Peso (%)</span>
+
+          <label className="jd-field">
+            <span>Peso (%)</span>
             <input
               type="number"
               min={0}
               max={100}
               value={Math.round(form.weight * 100)}
-              onChange={(e) =>
-                setForm({ ...form, weight: Number(e.target.value) / 100 })
-              }
-              className="w-full rounded-sm border border-line px-3 py-2 text-sm"
+              onChange={(e) => setForm({ ...form, weight: Number(e.target.value) / 100 })}
+              className="jd-input"
             />
           </label>
-          <label className="col-span-3 flex items-center gap-2 text-sm">
+
+          <label className="jd-field jd-field--check jd-field--span-3">
             <input
               type="checkbox"
               checked={form.is_mandatory}
-              onChange={(e) =>
-                setForm({ ...form, is_mandatory: e.target.checked })
-              }
+              onChange={(e) => setForm({ ...form, is_mandatory: e.target.checked })}
             />
-            <span className="text-ink-soft">Obrigatório</span>
+            <span>Obrigatório</span>
           </label>
-          <label className="col-span-3">
-            Descrição
+
+          <label className="jd-field jd-field--span-3">
+            <span>Descrição</span>
             <textarea
               value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="jd-textarea"
             />
           </label>
-          <label>
-            Nível esperado
+
+          <label className="jd-field">
+            <span>Nível esperado</span>
             <select
               value={form.expected_level}
-              onChange={(e) =>
-                setForm({ ...form, expected_level: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, expected_level: e.target.value })}
+              className="jd-select"
             >
               <option value="basic">Básico</option>
               <option value="intermediate">Intermédio</option>
@@ -331,52 +312,44 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
               <option value="expert">Especialista</option>
             </select>
           </label>
-          <button
-            type="submit"
-            className="rounded-sm bg-brand text-white px-4 py-2 text-sm font-medium hover:bg-brand-dark"
-          >
+
+          <button type="submit" className="jd-btn jd-btn--primary">
             Guardar requisito
           </button>
         </form>
       )}
 
-      <div className="bg-surface border border-line rounded-lg divide-y divide-line">
+      <div className="jd-card jd-card--list">
         {totalWeight <= 0 && (
-          <p role="alert">
+          <p role="alert" className="jd-alert">
             Defina pelo menos um peso superior a zero para analisar CVs.
           </p>
         )}
         {addMutation.isError && (
-          <p role="alert">{apiErrorMessage(addMutation.error)}</p>
+          <p role="alert" className="jd-alert">
+            {apiErrorMessage(addMutation.error)}
+          </p>
         )}
         {deleteMutation.isError && (
-          <p role="alert">{apiErrorMessage(deleteMutation.error)}</p>
+          <p role="alert" className="jd-alert">
+            {apiErrorMessage(deleteMutation.error)}
+          </p>
         )}
         {job.requirements.length === 0 && (
-          <p className="px-5 py-8 text-center text-ink-faint text-sm">
-            Ainda não há requisitos. Adicione pelo menos um antes de publicar a
-            vaga.
+          <p className="jd-card__state">
+            Ainda não há requisitos. Adicione pelo menos um antes de publicar a vaga.
           </p>
         )}
         {job.requirements.map((req: JobRequirement) => (
-          <div
-            key={req.id}
-            className="flex items-center justify-between px-5 py-3"
-          >
+          <div key={req.id} className="jd-card__row">
             <div>
-              <span className="text-ink">{req.name}</span>
-              <span className="text-ink-faint text-sm ml-2">
-                {CATEGORY_LABELS[req.category]}
-              </span>
-              {req.is_mandatory && (
-                <span className="ml-2 text-xs rounded-sm bg-danger-soft text-danger px-1.5 py-0.5">
-                  Obrigatório
-                </span>
-              )}
+              <span className="jd-name">{req.name}</span>
+              <span className="jd-category">{CATEGORY_LABELS[req.category]}</span>
+              {req.is_mandatory && <span className="jd-badge-mandatory">Obrigatório</span>}
             </div>
-            <div className="flex items-center gap-4">
+            <div className="jd-list-item__right">
               <button
-                className="text-brand"
+                className="jd-btn jd-btn--ghost"
                 onClick={() => {
                   setEditingId(req.id);
                   setShowForm(true);
@@ -392,12 +365,10 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
               >
                 Editar
               </button>
-              <span className="text-sm text-ink-soft">
-                {(req.weight * 100).toFixed(0)}%
-              </span>
+              <span className="jd-weight">{(req.weight * 100).toFixed(0)}%</span>
               <button
                 onClick={() => deleteMutation.mutate(req.id)}
-                className="text-sm text-ink-faint hover:text-danger"
+                className="jd-btn jd-btn--ghost jd-link--danger"
               >
                 Remover
               </button>
@@ -408,6 +379,8 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
     </div>
   );
 }
+
+/* ===================== Candidates ===================== */
 
 function CandidatesTab({ jobId }: { jobId: string }) {
   const queryClient = useQueryClient();
@@ -423,7 +396,10 @@ function CandidatesTab({ jobId }: { jobId: string }) {
     queryKey: ["job-candidates", jobId],
     queryFn: async () =>
       (await api.get<ApplicationDetail[]>(`/jobs/${jobId}/candidates`)).data,
-    refetchInterval: query => query.state.data?.some(app => ["queued", "running"].includes(app.analysis_status)) ? 1500 : false,
+    refetchInterval: (query) =>
+      query.state.data?.some((app) => ["queued", "running"].includes(app.analysis_status))
+        ? 1500
+        : false,
   });
 
   const analyzeMutation = useMutation({
@@ -472,111 +448,107 @@ function CandidatesTab({ jobId }: { jobId: string }) {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setUploadOpen((v) => !v)}
-          className="text-sm text-brand hover:text-brand-dark font-medium"
-        >
+      <div className="jd-card__toolbar" style={{ justifyContent: "flex-end" }}>
+        <button className="jd-btn jd-btn--ghost" onClick={() => setUploadOpen((v) => !v)}>
           {uploadOpen ? "Cancelar" : "+ Carregar CV"}
         </button>
       </div>
 
       {uploadOpen && (
-        <form
-          onSubmit={handleUpload}
-          className="bg-surface border border-line rounded-lg p-4 mb-4 grid grid-cols-3 gap-3 items-end"
-        >
-          <label className="text-sm">
-            <span className="block text-ink-soft mb-1">Nome do candidato</span>
+        <form onSubmit={handleUpload} className="jd-form jd-form--3col">
+          <label className="jd-field">
+            <span>Nome do candidato</span>
             <input
               required
               value={candidateName}
               onChange={(e) => setCandidateName(e.target.value)}
-              className="w-full rounded-sm border border-line px-3 py-2 text-sm"
+              className="jd-input"
             />
           </label>
-          <label className="text-sm">
-            <span className="block text-ink-soft mb-1">E-mail</span>
+          <label className="jd-field">
+            <span>E-mail</span>
             <input
               required
               type="email"
               value={candidateEmail}
               onChange={(e) => setCandidateEmail(e.target.value)}
-              className="w-full rounded-sm border border-line px-3 py-2 text-sm"
+              className="jd-input"
             />
           </label>
-          <label className="text-sm">
-            <span className="block text-ink-soft mb-1">
-              Ficheiro (PDF ou DOCX)
-            </span>
+          <label className="jd-field">
+            <span>Ficheiro (PDF ou DOCX)</span>
             <input
               required
               type="file"
               accept=".pdf,.docx"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="w-full text-sm"
+              className="jd-input"
             />
           </label>
           {uploadError && (
-            <p className="col-span-3 text-sm text-danger bg-danger-soft rounded-sm px-3 py-2">
+            <p className="jd-alert" style={{ gridColumn: "1 / -1" }}>
               {uploadError}
             </p>
           )}
-          <button
-            type="submit"
-            disabled={isUploading}
-            className="rounded-sm bg-brand text-white px-4 py-2 text-sm font-medium hover:bg-brand-dark disabled:opacity-60"
-          >
+          <button type="submit" disabled={isUploading} className="jd-btn jd-btn--primary">
             {isUploading ? "A carregar..." : "Carregar"}
           </button>
         </form>
       )}
 
-      <div className="bg-surface border border-line rounded-lg divide-y divide-line">
+      <div className="jd-card jd-card--list">
         {applications?.length === 0 && (
-          <p className="px-5 py-8 text-center text-ink-faint text-sm">
-            Ainda não há candidaturas para esta vaga.
+          <p className="jd-card__state">Ainda não há candidaturas para esta vaga.</p>
+        )}
+        {(candidatesError || analyzeMutation.isError) && (
+          <p role="alert" className="jd-alert">
+            {apiErrorMessage(candidatesError || analyzeMutation.error)}
           </p>
         )}
-        {(candidatesError || analyzeMutation.isError) && <p role="alert">{apiErrorMessage(candidatesError || analyzeMutation.error)}</p>}
         {applications?.map((app) => (
-          <div
-            key={app.id}
-            className="flex items-center justify-between px-5 py-3"
-          >
+          <div key={app.id} className="jd-card__row">
             <div>
               <Link
                 to={`/jobs/${jobId}/applications/${app.id}`}
-                className="text-ink hover:text-brand font-medium"
+                className="jd-name jd-link"
               >
                 {app.candidate.name}
               </Link>
-              <p className="text-sm text-ink-faint">{app.candidate.email}</p>
+              <p className="jd-email">{app.candidate.email}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <AnalysisStatusBadge value={pendingAnalysisIds.includes(app.latest_resume_id ?? -1) ? {...app, analysis_status: "queued"} : app} />
+            <div className="jd-list-item__right">
+              <AnalysisStatusBadge
+                value={
+                  pendingAnalysisIds.includes(app.latest_resume_id ?? -1)
+                    ? { ...app, analysis_status: "queued" }
+                    : app
+                }
+              />
               {app.score !== null && (
-                <span className="font-display text-lg text-ink">
-                  {app.score.toFixed(0)}%
-                </span>
+                <span className="jd-score">{app.score.toFixed(0)}%</span>
               )}
               {analysisPresentation(app).action === "view" ? (
-                <Link to={`/jobs/${jobId}/applications/${app.id}`} className="text-sm text-brand">Ver análise</Link>
-              ) : analysisPresentation(app).action !== "busy" && (
-                <button
-                  onClick={() =>
-                    app.latest_resume_id && analyzeMutation.mutate(app.latest_resume_id)
-                  }
-                  disabled={
-                    analyzeMutation.isPending ||
-                    !app.latest_resume_id || pendingAnalysisIds.includes(app.latest_resume_id)
-                  }
-                  className="text-sm text-brand hover:text-brand-dark font-medium disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {pendingAnalysisIds.includes(app.latest_resume_id ?? -1)
-                    ? "Em fila..."
-                    : analysisPresentation(app).actionLabel}
-                </button>
+                <Link to={`/jobs/${jobId}/applications/${app.id}`} className="jd-link">
+                  Ver análise
+                </Link>
+              ) : (
+                analysisPresentation(app).action !== "busy" && (
+                  <button
+                    onClick={() =>
+                      app.latest_resume_id && analyzeMutation.mutate(app.latest_resume_id)
+                    }
+                    disabled={
+                      analyzeMutation.isPending ||
+                      !app.latest_resume_id ||
+                      pendingAnalysisIds.includes(app.latest_resume_id)
+                    }
+                    className="jd-btn jd-btn--ghost"
+                  >
+                    {pendingAnalysisIds.includes(app.latest_resume_id ?? -1)
+                      ? "Em fila..."
+                      : analysisPresentation(app).actionLabel}
+                  </button>
+                )
               )}
             </div>
           </div>
@@ -585,6 +557,8 @@ function CandidatesTab({ jobId }: { jobId: string }) {
     </div>
   );
 }
+
+/* ===================== Ranking ===================== */
 
 const FILTERS: [string, string][] = [
   ["", "Todos"],
@@ -610,45 +584,43 @@ function RankingTab({ jobId }: { jobId: string }) {
 
   return (
     <div>
-      <div className="flex gap-2 mb-4 flex-wrap">
+      <div className="jd-filters">
         {FILTERS.map(([value, label]) => (
           <button
             key={value}
             onClick={() => setFilter(value)}
-            className={`text-sm rounded-sm px-3 py-1.5 border transition-colors ${
-              filter === value
-                ? "border-brand bg-brand-soft text-brand-dark"
-                : "border-line text-ink-soft hover:bg-canvas"
-            }`}
+            className={`jd-filter ${filter === value ? "is-active" : ""}`}
           >
             {label}
           </button>
         ))}
       </div>
 
-      <div className="bg-surface border border-line rounded-lg divide-y divide-line">
-        {rankingError && <p role="alert">{apiErrorMessage(rankingError)}</p>}
-        {ranking?.length === 0 && (
-          <p className="px-5 py-8 text-center text-ink-faint text-sm">
-            Nenhum candidato nesta categoria.
+      <div className="jd-card jd-card--list">
+        {rankingError && (
+          <p role="alert" className="jd-alert">
+            {apiErrorMessage(rankingError)}
           </p>
+        )}
+        {ranking?.length === 0 && (
+          <p className="jd-card__state">Nenhum candidato nesta categoria.</p>
         )}
         {ranking?.map((item, index) => (
           <Link
             key={item.application_id}
             to={`/jobs/${jobId}/applications/${item.application_id}`}
-            className="flex items-center justify-between px-5 py-3 hover:bg-canvas transition-colors"
+            className="jd-list-item"
           >
-            <div className="flex items-center gap-4">
-              <span className="text-ink-faint text-sm w-5">{index + 1}.</span>
+            <div className="jd-list-item__left">
+              <span className="jd-rank">{index + 1}.</span>
               <div>
-                <p className="text-ink font-medium">{item.candidate_name}</p>
-                <p className="text-sm text-ink-faint">{item.candidate_email}</p>
+                <p className="jd-name">{item.candidate_name}</p>
+                <p className="jd-email">{item.candidate_email}</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="jd-list-item__right">
               <AnalysisStatusBadge value={item} />
-              <span className="font-display text-lg text-ink w-14 text-right">
+              <span className="jd-score">
                 {item.score !== null ? `${item.score.toFixed(0)}%` : "—"}
               </span>
             </div>

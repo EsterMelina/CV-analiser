@@ -1,0 +1,168 @@
+/* ============================================================
+   SIR — Lista de Vagas
+   ============================================================ */
+
+.jobs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header */
+.jobs-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.jobs-page__title {
+  margin: 0 0 0.25rem;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sir-on-surface);
+}
+
+.jobs-page__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--sir-on-surface-variant);
+}
+
+/* Filtros */
+.jobs-page__filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.jobs-page__search {
+  flex: 1;
+  min-width: 220px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+  background: var(--sir-surface);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--sir-on-surface);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.jobs-page__search::placeholder { color: var(--sir-outline); }
+
+.jobs-page__search:focus {
+  border-color: var(--sir-primary-container);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.jobs-page__select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+  background: var(--sir-surface);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--sir-on-surface);
+  outline: none;
+  cursor: pointer;
+}
+
+.jobs-page__select:focus {
+  border-color: var(--sir-primary-container);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* Lista */
+.jobs-list {
+  background: var(--sir-surface);
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.jobs-list__state {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  font-size: 14px;
+  color: var(--sir-outline);
+}
+
+.jobs-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--sir-outline-variant);
+  transition: background-color 0.15s;
+}
+
+.jobs-list__item:last-child { border-bottom: none; }
+.jobs-list__item:hover { background: var(--sir-bg); }
+
+.jobs-list__info { min-width: 0; }
+
+.jobs-list__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sir-on-surface);
+}
+
+.jobs-list__meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--sir-outline);
+}
+
+/* Badge de estado */
+.jobs-list__status {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.jobs-list__status--draft {
+  background: rgba(11, 28, 48, 0.05);
+  color: var(--sir-on-surface-variant);
+}
+
+.jobs-list__status--published {
+  background: #dbe1ff;
+  color: #003ea8;
+}
+
+.jobs-list__status--closed {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.jobs-list__status--archived {
+  background: rgba(11, 28, 48, 0.05);
+  color: var(--sir-outline);
+}
+
+/* Botão "Nova vaga" */
+.btn-primary-solid {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--sir-primary-container);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.btn-primary-solid:hover { background: var(--sir-primary); }

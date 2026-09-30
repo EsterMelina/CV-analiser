@@ -1,0 +1,321 @@
+/* ============================================================
+   SIR — Visão do Candidato (análise de CV)
+   ============================================================ */
+
+.cand {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Voltar */
+.cand__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sir-primary-container);
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.cand__back:hover { text-decoration: underline; }
+
+/* Header */
+.cand__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cand__name {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sir-on-surface);
+}
+
+.cand__email {
+  margin: 0;
+  font-size: 14px;
+  color: var(--sir-on-surface-variant);
+}
+
+.cand__stage {
+  margin: 0.25rem 0 0;
+  font-size: 14px;
+  color: var(--sir-on-surface);
+}
+
+.cand__stage-label {
+  color: var(--sir-on-surface-variant);
+}
+
+/* Alerts */
+.cand__alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 14px;
+  border: 1px solid #fecaca;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cand__alert--status {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.cand__alert--warning {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+/* Barra de ações (documento, download, analisar) */
+.cand__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cand__field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: var(--sir-on-surface-variant);
+}
+
+.cand__select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+  background: var(--sir-surface);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--sir-on-surface);
+  outline: none;
+  cursor: pointer;
+  max-width: 320px;
+}
+
+.cand__select:focus {
+  border-color: var(--sir-primary-container);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* Botões */
+.cand__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+  background: var(--sir-surface);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sir-on-surface);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.cand__btn:hover { background: var(--sir-bg); }
+
+.cand__btn--primary {
+  background: var(--sir-primary-container);
+  color: #fff;
+  border-color: var(--sir-primary-container);
+}
+
+.cand__btn--primary:hover { background: var(--sir-primary); }
+
+.cand__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cand__btn--danger {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.cand__btn--danger:hover { background: #fee2e2; }
+
+/* Estado de execução (a analisar) */
+.cand__status {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--sir-surface-low);
+  color: var(--sir-on-surface-variant);
+  font-size: 14px;
+  border: 1px solid var(--sir-outline-variant);
+}
+
+/* Secção principal (resultado da análise) */
+.cand__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: var(--sir-surface);
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+}
+
+.cand__section h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--sir-on-surface);
+}
+
+.cand__section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sir-on-surface);
+}
+
+.cand__section p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--sir-on-surface);
+}
+
+/* Details / summary */
+.cand__details {
+  font-size: 14px;
+  color: var(--sir-on-surface-variant);
+}
+
+.cand__details > summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--sir-on-surface);
+  padding: 0.25rem 0;
+}
+
+.cand__details > summary:hover { color: var(--sir-primary-container); }
+
+.cand__details[open] > summary { margin-bottom: 0.5rem; }
+
+/* Listas (skills/education/languages) */
+.cand__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.cand__facts ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 14px;
+  color: var(--sir-on-surface);
+}
+
+.cand__facts li {
+  margin-bottom: 0.25rem;
+}
+
+.cand__experience {
+  font-size: 14px;
+  color: var(--sir-on-surface);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--sir-outline-variant);
+}
+
+.cand__experience:last-child { border-bottom: none; }
+
+/* Evidência por requisito */
+.cand__evidence {
+  padding: 1rem;
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.5rem;
+  background: var(--sir-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cand__evidence h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.cand__evidence--evidenced { border-left: 3px solid #6ffbbe; }
+.cand__evidence--partial   { border-left: 3px solid #fde68a; }
+.cand__evidence--not_evidenced { border-left: 3px solid #fecaca; }
+.cand__evidence--contradictory { border-left: 3px solid #fca5a5; }
+
+.cand__quote {
+  margin: 0.25rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--sir-primary-container);
+  background: var(--sir-surface-low);
+  font-size: 13px;
+  color: var(--sir-on-surface-variant);
+}
+
+.cand__quote a {
+  color: var(--sir-primary-container);
+  text-decoration: none;
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.cand__quote a:hover { text-decoration: underline; }
+
+.cand__quote mark {
+  background: #dbe1ff;
+  color: inherit;
+  padding: 0 0.125rem;
+}
+
+/* Sources (texto original) */
+.cand__source {
+  border: 1px solid var(--sir-outline-variant);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--sir-surface);
+}
+
+.cand__source > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sir-on-surface-variant);
+}
+
+.cand__source pre {
+  margin: 0.5rem 0 0;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  color: var(--sir-on-surface);
+  line-height: 1.5;
+}
+
+/* Estado vazio */
+.cand__empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 14px;
+  color: var(--sir-outline);
+}

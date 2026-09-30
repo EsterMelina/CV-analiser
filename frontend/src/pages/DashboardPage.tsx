@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
+import "./Dashboard.css";
+
+/* ==================== Types ==================== */
 
 interface Summary {
   total_jobs: number;
@@ -22,14 +25,32 @@ interface JobApplicationCount {
   recommended: number;
 }
 
-function MetricCard({ label, value }: { label: string; value: number }) {
+/* ==================== Metric Card ==================== */
+
+type Tone = "info" | "positive" | "warning" | "default";
+
+interface MetricCardProps {
+  icon: string;
+  label: string;
+  value: number;
+  tone?: Tone;
+}
+
+function MetricCard({ icon, label, value, tone = "default" }: MetricCardProps) {
   return (
-    <div className="bg-surface border border-line rounded-lg px-5 py-4">
-      <p className="font-display text-3xl text-ink">{value}</p>
-      <p className="text-sm text-ink-soft mt-1">{label}</p>
+    <div className={`sir-metric sir-metric--${tone}`}>
+      <div className="sir-metric__top">
+        <div className="sir-metric__icon">{icon}</div>
+      </div>
+      <div className="sir-metric__body">
+        <div className="sir-metric__value">{value.toLocaleString("pt-PT")}</div>
+        <div className="sir-metric__label">{label}</div>
+      </div>
     </div>
   );
 }
+
+/* ==================== Page ==================== */
 
 export function DashboardPage() {
   const { data: summary } = useQuery({
@@ -39,59 +60,114 @@ export function DashboardPage() {
 
   const { data: byJob } = useQuery({
     queryKey: ["dashboard-by-job"],
-    queryFn: async () => (await api.get<JobApplicationCount[]>("/dashboard/applications-by-job")).data,
+    queryFn: async () =>
+      (await api.get<JobApplicationCount[]>("/dashboard/applications-by-job")).data,
   });
 
   return (
-    <div>
-      <h1 className="font-display text-2xl text-ink mb-1">Painel</h1>
-      <p className="text-ink-soft mb-6">Visão geral da triagem de candidatos.</p>
+    <div className="sir-dash">
+      {/* ===== Header ===== */}
+      <div className="sir-dash__header">
+        <span className="sir-dash__eyebrow">Visão geral</span>
+        <h1 className="sir-dash__title">Painel</h1>
+        <p className="sir-dash__subtitle">
+          Visão geral da triagem de candidatos.
+        </p>
+      </div>
 
+      {/* ===== Métricas ===== */}
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <MetricCard label="Vagas ativas" value={summary.active_jobs} />
-          <MetricCard label="Vagas encerradas" value={summary.closed_jobs} />
-          <MetricCard label="Candidatos" value={summary.total_candidates} />
-          <MetricCard label="Candidaturas" value={summary.total_applications} />
-          <MetricCard label="CVs analisados" value={summary.analyzed_applications} />
-          <MetricCard label="Recomendados" value={summary.recommended_applications} />
-          <MetricCard label="Em entrevista" value={summary.interview_selected_applications} />
-          <MetricCard label="Por avaliar" value={summary.pending_evaluation_applications} />
+        <div className="sir-dash__metrics">
+          <MetricCard icon="work"            label="Vagas ativas"     value={summary.active_jobs} tone="info" />
+          <MetricCard icon="task_alt"        label="Vagas encerradas" value={summary.closed_jobs} />
+          <MetricCard icon="group"           label="Candidatos"       value={summary.total_candidates} />
+          <MetricCard icon="description"     label="Candidaturas"     value={summary.total_applications} />
+          <MetricCard icon="fact_check"      label="CVs analisados"   value={summary.analyzed_applications} tone="info" />
+          <MetricCard icon="thumb_up"        label="Recomendados"     value={summary.recommended_applications} tone="positive" />
+          <MetricCard icon="event_available" label="Em entrevista"    value={summary.interview_selected_applications} tone="positive" />
+          <MetricCard icon="pending"         label="Por avaliar"      value={summary.pending_evaluation_applications} tone="warning" />
         </div>
       )}
 
-      <div className="bg-surface border border-line rounded-lg">
-        <div className="px-5 py-4 border-b border-line">
-          <h2 className="font-medium text-ink">Candidatos por vaga</h2>
+      {/* ===== Tabela ===== */}
+      <div className="sir-card">
+        <div className="sir-card__header">
+          <div className="sir-card__title-wrap">
+            <div className="sir-card__title-icon">view_list</div>
+            <h2 className="sir-card__title">Candidatos por vaga</h2>
+          </div>
+
+          {byJob && byJob.length > 0 && (
+            <span className="sir-card__count">
+              {byJob.length} {byJob.length === 1 ? "vaga" : "vagas"}
+            </span>
+          )}
         </div>
+
         {byJob && byJob.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-ink-soft border-b border-line">
-                <th className="px-5 py-2 font-normal">Vaga</th>
-                <th className="px-5 py-2 font-normal">Candidaturas</th>
-                <th className="px-5 py-2 font-normal">Recomendados</th>
-              </tr>
-            </thead>
-            <tbody>
-              {byJob.map((row) => (
-                <tr key={row.job_id} className="border-b border-line last:border-0">
-                  <td className="px-5 py-3">
-                    <Link to={`/jobs/${row.job_id}`} className="text-brand hover:text-brand-dark">
-                      {row.job_title}
-                    </Link>
-                    <span className="text-ink-faint ml-2">{row.job_code}</span>
-                  </td>
-                  <td className="px-5 py-3">{row.total_applications}</td>
-                  <td className="px-5 py-3">{row.recommended}</td>
+          <div className="sir-table-wrap">
+            <table className="sir-table">
+              <thead>
+                <tr>
+                  <th>Vaga &amp; Código</th>
+                  <th className="is-right">Candidaturas</th>
+                  <th className="is-center">Recomendados</th>
+                  <th className="is-right">Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {byJob.map((row) => (
+                  <tr key={row.job_id}>
+                    <td>
+                      <div className="sir-table__job">
+                        <Link to={`/jobs/${row.job_id}`} className="sir-table__job-title">
+                          {row.job_title}
+                        </Link>
+                        <span className="sir-table__job-code">{row.job_code}</span>
+                      </div>
+                    </td>
+
+                    <td className="is-right">
+                      <span className="sir-table__num">
+                        {row.total_applications.toLocaleString("pt-PT")}
+                      </span>
+                    </td>
+
+                    <td className="is-center">
+                      {row.recommended > 0 ? (
+                        <span className="sir-table__badge">
+                          <span className="sir-table__badge-icon">verified</span>
+                          <span>{row.recommended.toLocaleString("pt-PT")}</span>
+                        </span>
+                      ) : (
+                        <span className="sir-table__zero">0</span>
+                      )}
+                    </td>
+
+                    <td className="is-right">
+                      <div className="sir-table__actions">
+                        <Link to={`/jobs/${row.job_id}`} className="sir-table__btn">
+                          Ver ranking
+                        </Link>
+                        <Link
+                          to={`/jobs/${row.job_id}`}
+                          aria-label={`Abrir vaga ${row.job_title}`}
+                          className="sir-table__icon-btn"
+                        >
+                          <span className="sir-table__icon">chevron_right</span>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="px-5 py-8 text-center text-ink-faint text-sm">
-            Ainda não há vagas com candidaturas.
-          </p>
+          <div className="sir-empty">
+            <span className="sir-empty__icon">inbox</span>
+            <p className="sir-empty__text">Ainda não há vagas com candidaturas.</p>
+          </div>
         )}
       </div>
     </div>

@@ -1,61 +1,207 @@
 @tailwind base;
 @tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Material Symbols Outlined — base utility
+   ============================================================ */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
 
 @layer base {
-  body { @apply font-sans antialiased; }
+  html, body, #root { height: 100%; }
+
+  body {
+    @apply font-sans antialiased bg-canvas text-ink;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
   h1, h2, h3 { @apply tracking-tight; }
   h1 { @apply font-semibold; }
+
+  table, [data-numeric] { font-variant-numeric: tabular-nums; }
+
+  /* Botões */
   button { @apply transition-colors; }
   button:disabled { @apply cursor-not-allowed opacity-50; }
-  button:not([class]), .questionnaire-editor button { @apply rounded border border-line bg-surface px-3 py-2 text-sm font-medium text-brand-dark; }
-  button:not([class]):hover:enabled, .questionnaire-editor button:hover:enabled { @apply bg-brand-soft; }
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea { @apply max-w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink; }
-  input[type="checkbox"], input[type="radio"] { accent-color: #456786; }
+
+  button:not([class]),
+  .questionnaire-editor button {
+    @apply rounded border border-line bg-surface px-3 py-2 text-sm font-medium text-brand-dark;
+  }
+  button:not([class]):hover:enabled,
+  .questionnaire-editor button:hover:enabled {
+    @apply bg-brand-soft;
+  }
+
+  /* Inputs */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    @apply max-w-full rounded border border-line-input bg-surface px-3 py-2 text-sm text-ink;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+  select:focus,
+  textarea:focus {
+    @apply border-brand outline-none ring-1 ring-brand;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] { accent-color: #2563EB; }
+
   textarea { @apply min-h-24; }
   select { @apply ml-1; }
+
   fieldset { @apply min-w-0 rounded-lg border-line; }
   legend { @apply px-2 text-sm font-semibold text-ink; }
   label { @apply text-sm; }
   summary { @apply cursor-pointer text-sm font-medium; }
-  [role="alert"] { @apply rounded border border-danger/20 bg-danger-soft p-3 text-sm text-danger; }
+
+  [role="alert"] {
+    @apply rounded border border-danger/20 bg-danger-soft p-3 text-sm text-danger-ink;
+  }
+
   thead { @apply bg-canvas; }
+
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #DFE5ED transparent;
+  }
 }
 
 @layer components {
+  /* ===== Botões ===== */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded font-medium transition-colors
+           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+  .btn-primary   { @apply btn bg-brand text-white hover:bg-brand-dark; }
+  .btn-secondary { @apply btn bg-surface text-ink border border-line hover:bg-subtle; }
+  .btn-destructive {
+    @apply btn bg-danger-soft text-danger-deep border border-danger-border-strong hover:bg-danger-container;
+  }
+  .btn-sm { @apply h-8 px-3 text-label-md; }
+  .btn-md { @apply h-10 px-4 text-label-lg; }
+  .btn-lg { @apply h-12 px-5 text-label-lg; }
+
+  /* ===== Badges ===== */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-label-sm uppercase;
+  }
+  .badge-verified { @apply badge bg-success-soft text-success-ink border-success-border; }
+  .badge-partial  { @apply badge bg-warning-soft text-warning-ink border-warning-border; }
+  .badge-missing  { @apply badge bg-danger-soft text-danger-ink border-danger-border; }
+  .badge-ai {
+    @apply badge;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+  }
+
+  /* ===== Cards ===== */
+  .card       { @apply bg-surface border border-line rounded-lg shadow-card p-6; }
+  .card-xl    { @apply rounded-xl; }
+  .card-divider { @apply border-t border-subtle; }
+
+  /* Card translúcido sobre o fundo neural */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  /* Input com focus ring brand */
+  .custom-input:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  /* ===== Data Table ===== */
+  .data-table thead th {
+    @apply h-10 bg-canvas text-label-sm uppercase text-ink-faint
+           border-b border-line px-3 text-left;
+  }
+  .data-table tbody tr { @apply h-14 border-b border-subtle hover:bg-canvas; }
+  .data-table tbody td { @apply px-3 text-body-md; }
+
+  /* ===== AI Disclaimer ===== */
+  .ai-disclaimer {
+    @apply bg-canvas border-l-[3px] border-brand px-4 py-3 text-body-sm text-ink-soft;
+  }
+
+  /* ===== Questionnaire ===== */
   .questionnaire-editor > details > fieldset { @apply bg-canvas p-5; }
-  .questionnaire-editor > details > fieldset label { @apply inline-flex flex-wrap items-center gap-2; }
+  .questionnaire-editor > details > fieldset label {
+    @apply inline-flex flex-wrap items-center gap-2;
+  }
   .questionnaire-editor input[type="number"] { @apply w-20; }
   .questionnaire-editor textarea { @apply block w-full mt-1; }
-  .questionnaire-editor > div > a { @apply self-center text-sm font-medium text-brand hover:underline; }
-}
-@tailwind utilities;
-
-html, body, #root {
-  height: 100%;
+  .questionnaire-editor > div > a {
+    @apply self-center text-sm font-medium text-brand hover:underline;
+  }
 }
 
-body {
-  background-color: #F4F6F9;
-  color: #243247;
+@layer utilities {
+  /* ===== Neural background animations ===== */
+  @keyframes nodePulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+  }
+
+  @keyframes synapseFlow {
+    to { stroke-dashoffset: -120; }
+  }
+
+  @keyframes hubRing {
+    0%   { r: 14; opacity: 0.6; }
+    100% { r: 60; opacity: 0; }
+  }
+
+  @keyframes scanRing {
+    0%   { r: 0;   opacity: 0;    stroke-width: 3;   }
+    10%  {        opacity: 0.85; stroke-width: 2.4; }
+    100% { r: 440; opacity: 0;    stroke-width: 0.6; }
+  }
+
+  .scan-ring {
+    animation: scanRing 6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+    transform-origin: center;
+  }
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #DFE5ED transparent;
+/* ===== Print / Questionnaire ===== */
+.questionnaire-sheet {
+  max-width: 190mm;
+  margin: 1rem auto;
+  padding: 10mm;
+  background: white;
+  color: black;
 }
-
-:focus-visible {
-  outline: 2px solid #456786;
-  outline-offset: 2px;
-}
-
-.questionnaire-sheet { max-width: 190mm; margin: 1rem auto; padding: 10mm; background: white; color: black; }
 .questionnaire-sheet h1 { font-size: 22pt; }
 .questionnaire-sheet h2 { font-size: 16pt; margin: 1rem 0; }
 .questionnaire-sheet ol { list-style: decimal; padding-left: 1.5rem; }
 .questionnaire-sheet ol ol { list-style: upper-alpha; }
 .print-question { margin: 1rem 0 2rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .answer-space { height: 35mm; border-bottom: 1px solid #bbb; }
+
 @media print {
   @page { size: A4; margin: 15mm; }
   html, body, #root { height: auto; background: white; }

@@ -2,16 +2,29 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, apiErrorMessage } from "@/lib/api";
 import type { JobModality, JobType, JobDetail } from "@/types";
+import "./JobCreate.css";
 
-export function JobCreatePage({ job, onSaved }: { job?: JobDetail; onSaved?: () => void }) {
+export function JobCreatePage({
+  job,
+  onSaved,
+}: {
+  job?: JobDetail;
+  onSaved?: () => void;
+}) {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
-    title: job?.title ?? "", code: job?.code ?? "", description: job?.description ?? "", department: job?.department ?? "", location: job?.location ?? "",
-    job_type: job?.job_type ?? "full_time" as JobType, modality: job?.modality ?? "on_site" as JobModality,
-    min_experience_years: job?.min_experience_years ?? 0, education_level: job?.education_level ?? "",
+    title: job?.title ?? "",
+    code: job?.code ?? "",
+    description: job?.description ?? "",
+    department: job?.department ?? "",
+    location: job?.location ?? "",
+    job_type: job?.job_type ?? ("full_time" as JobType),
+    modality: job?.modality ?? ("on_site" as JobModality),
+    min_experience_years: job?.min_experience_years ?? 0,
+    education_level: job?.education_level ?? "",
   });
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
@@ -23,8 +36,11 @@ export function JobCreatePage({ job, onSaved }: { job?: JobDetail; onSaved?: () 
     setError(null);
     setIsSubmitting(true);
     try {
-      const { data } = job ? await api.put(`/jobs/${job.id}`, form) : await api.post("/jobs", form);
-      if (onSaved) onSaved(); else navigate(`/jobs/${data.id}`);
+      const { data } = job
+        ? await api.put(`/jobs/${job.id}`, form)
+        : await api.post("/jobs", form);
+      if (onSaved) onSaved();
+      else navigate(`/jobs/${data.id}`);
     } catch (err) {
       setError(apiErrorMessage(err, "Não foi possível criar a vaga."));
     } finally {
@@ -33,36 +49,67 @@ export function JobCreatePage({ job, onSaved }: { job?: JobDetail; onSaved?: () 
   }
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="font-display text-2xl text-ink mb-1">{job ? "Editar vaga" : "Nova vaga"}</h1>
-      <p className="text-ink-soft mb-6">Depois de criada, adicione os requisitos antes de publicar.</p>
+    <div className="job-create">
+      <h1 className="job-create__title">{job ? "Editar vaga" : "Nova vaga"}</h1>
+      <p className="job-create__subtitle">
+        Depois de criada, adicione os requisitos antes de publicar.
+      </p>
 
-      <form onSubmit={handleSubmit} className="bg-surface border border-line rounded-lg p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="job-create__form">
+        <div className="job-create__grid">
           <Field label="Título" required>
-            <input required value={form.title} onChange={(e) => update("title", e.target.value)} className={inputClass} />
+            <input
+              required
+              value={form.title}
+              onChange={(e) => update("title", e.target.value)}
+              className="job-input"
+            />
           </Field>
           <Field label="Código da vaga" required>
-            <input required value={form.code} onChange={(e) => update("code", e.target.value)} placeholder="VAG-2026-001" className={inputClass} />
+            <input
+              required
+              value={form.code}
+              onChange={(e) => update("code", e.target.value)}
+              placeholder="VAG-2026-001"
+              className="job-input"
+            />
           </Field>
         </div>
 
         <Field label="Descrição" required>
-          <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
+          <textarea
+            required
+            rows={4}
+            value={form.description}
+            onChange={(e) => update("description", e.target.value)}
+            className="job-textarea"
+          />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="job-create__grid">
           <Field label="Departamento">
-            <input value={form.department} onChange={(e) => update("department", e.target.value)} className={inputClass} />
+            <input
+              value={form.department}
+              onChange={(e) => update("department", e.target.value)}
+              className="job-input"
+            />
           </Field>
           <Field label="Localização">
-            <input value={form.location} onChange={(e) => update("location", e.target.value)} className={inputClass} />
+            <input
+              value={form.location}
+              onChange={(e) => update("location", e.target.value)}
+              className="job-input"
+            />
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="job-create__grid">
           <Field label="Tipo de trabalho">
-            <select value={form.job_type} onChange={(e) => update("job_type", e.target.value as JobType)} className={inputClass}>
+            <select
+              value={form.job_type}
+              onChange={(e) => update("job_type", e.target.value as JobType)}
+              className="job-select"
+            >
               <option value="full_time">Tempo inteiro</option>
               <option value="part_time">Meio período</option>
               <option value="internship">Estágio</option>
@@ -71,7 +118,11 @@ export function JobCreatePage({ job, onSaved }: { job?: JobDetail; onSaved?: () 
             </select>
           </Field>
           <Field label="Modalidade">
-            <select value={form.modality} onChange={(e) => update("modality", e.target.value as JobModality)} className={inputClass}>
+            <select
+              value={form.modality}
+              onChange={(e) => update("modality", e.target.value as JobModality)}
+              className="job-select"
+            >
               <option value="on_site">Presencial</option>
               <option value="remote">Remoto</option>
               <option value="hybrid">Híbrido</option>
@@ -79,29 +130,42 @@ export function JobCreatePage({ job, onSaved }: { job?: JobDetail; onSaved?: () 
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="job-create__grid">
           <Field label="Experiência mínima (anos)">
             <input
-              type="number" min={0} value={form.min_experience_years}
+              type="number"
+              min={0}
+              value={form.min_experience_years}
               onChange={(e) => update("min_experience_years", Number(e.target.value))}
-              className={inputClass}
+              className="job-input"
             />
           </Field>
           <Field label="Formação académica">
-            <input value={form.education_level} onChange={(e) => update("education_level", e.target.value)} className={inputClass} />
-            <small>Campo descritivo. Para avaliar formação, acrescente um requisito da categoria Formação com peso e obrigatoriedade.</small>
+            <input
+              value={form.education_level}
+              onChange={(e) => update("education_level", e.target.value)}
+              className="job-input"
+            />
+            <small className="job-field__hint">
+              Campo descritivo. Para avaliar formação, acrescente um requisito da categoria
+              Formação com peso e obrigatoriedade.
+            </small>
           </Field>
         </div>
 
-        {error && <p className="text-sm text-danger bg-danger-soft rounded-sm px-3 py-2">{error}</p>}
+        {error && <p className="job-create__error">{error}</p>}
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="job-create__actions">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-sm bg-brand text-white px-4 py-2 text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-60"
+            className="job-create__submit"
           >
-            {isSubmitting ? "A guardar..." : job ? "Guardar alterações" : "Criar vaga"}
+            {isSubmitting
+              ? "A guardar..."
+              : job
+              ? "Guardar alterações"
+              : "Criar vaga"}
           </button>
         </div>
       </form>
@@ -109,13 +173,20 @@ export function JobCreatePage({ job, onSaved }: { job?: JobDetail; onSaved?: () 
   );
 }
 
-const inputClass = "w-full rounded-sm border border-line px-3 py-2 text-sm focus:border-brand";
-
-function Field({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <label className="block">
-      <span className="block text-sm text-ink-soft mb-1">
-        {label}{required && <span className="text-danger"> *</span>}
+    <label className="job-field">
+      <span className="job-field__label">
+        {label}
+        {required && <span className="job-field__required"> *</span>}
       </span>
       {children}
     </label>

@@ -1,10 +1,11 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import "./Layout.css";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Painel", end: true },
-  { to: "/jobs", label: "Vagas" },
-  { to: "/settings/email", label: "Integração de e-mail" },
+  { to: "/",               label: "Painel",               icon: "dashboard", end: true },
+  { to: "/jobs",           label: "Vagas",                icon: "work" },
+  { to: "/settings/email", label: "Integração de e-mail", icon: "settings" },
 ];
 
 export function Layout() {
@@ -16,49 +17,130 @@ export function Layout() {
     navigate("/login");
   }
 
+  const initials =
+    user?.name
+      ?.split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("") ?? "?";
+
   return (
-    <div className="flex min-h-screen flex-col bg-canvas text-ink md:h-screen md:flex-row">
-      <aside className="w-full shrink-0 bg-surface border-b md:border-b-0 md:border-r border-line text-ink flex flex-col md:w-64">
-        <div className="px-5 py-5 border-b border-line">
-          <p className="font-display font-semibold text-lg leading-tight">Recrutamento</p>
-          <p className="font-display font-semibold text-lg leading-tight text-ink-soft">Inteligente</p>
+    <div className="sir-layout">
+      {/* ===================== Sidebar ===================== */}
+      <aside className="sir-sidebar">
+        {/* Logo */}
+        <div className="sir-sidebar__logo">
+          <div className="sir-sidebar__logo-mark">
+            <span className="sir-sidebar__link-icon">travel_explore</span>
+          </div>
+          <div className="sir-sidebar__logo-text">
+            <span className="sir-sidebar__logo-title">SIR</span>
+            <span className="sir-sidebar__logo-subtitle">Recrutamento IA</span>
+          </div>
         </div>
 
-        <nav aria-label="Navegação principal" className="flex flex-wrap gap-1 px-3 py-4 md:block md:flex-1 md:space-y-1">
+        {/* Section label */}
+        <div className="sir-sidebar__section">
+          <div className="sir-sidebar__section-label">Plataforma</div>
+        </div>
+
+        {/* Nav */}
+        <nav className="sir-sidebar__nav" aria-label="Navegação principal">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `block rounded-sm px-3 py-2 text-sm transition-colors ${
-                  isActive ? "bg-brand-soft text-brand-dark font-semibold" : "text-ink-soft hover:bg-canvas hover:text-ink"
-                }`
+                "sir-sidebar__link" + (isActive ? " is-active" : "")
               }
             >
-              {item.label}
+              <span className="sir-sidebar__link-icon">{item.icon}</span>
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-line text-sm">
-          <p className="px-3 text-ink">{user?.name}</p>
-          <p className="px-3 text-ink-soft text-xs mb-3">{user?.role === "admin" ? "Administrador" : "Recrutador"}</p>
-          <button
-            onClick={handleLogout}
-            className="w-full text-left rounded-sm px-3 py-2 text-ink-soft hover:bg-canvas hover:text-ink transition-colors"
-          >
-            Terminar sessão
+        {/* Motor SIR IA */}
+        <div className="sir-sidebar__card">
+          <div className="sir-sidebar__card-title">
+            <span className="sir-sidebar__link-icon" style={{ fontSize: 18 }}>
+              verified
+            </span>
+            <span>Motor SIR IA</span>
+          </div>
+          <p className="sir-sidebar__card-text">
+            Triagem preditiva com evidências empíricas ativada.
+          </p>
+        </div>
+
+        {/* Utilizador + logout */}
+        <div className="sir-sidebar__user">
+          <div className="sir-sidebar__user-info">
+            <div className="sir-sidebar__avatar">{initials}</div>
+            <div className="sir-sidebar__user-text">
+              <span className="sir-sidebar__user-name">{user?.name ?? "—"}</span>
+              <span className="sir-sidebar__user-role">
+                {user?.role === "admin" ? "Administrador" : "Recrutador"}
+              </span>
+            </div>
+          </div>
+
+          <button type="button" onClick={handleLogout} className="sir-sidebar__logout">
+            <span className="sir-sidebar__link-icon" style={{ fontSize: 18 }}>
+              logout
+            </span>
+            <span>Terminar sessão</span>
           </button>
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 md:overflow-y-auto">
-        <header className="border-b border-line bg-surface px-5 py-4 sm:px-8"><p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">Gestão de pessoas <span className="mx-2 text-ink-faint">/</span> Recrutamento e selecção</p></header>
-        <div className="max-w-6xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
-          <Outlet />
-        </div>
-      </main>
+      {/* ===================== Conteúdo ===================== */}
+      <div className="sir-main">
+        {/* Header */}
+        <header className="sir-header">
+          {/* Esquerda: pesquisa + chip */}
+          <div className="sir-header__search-wrap">
+            <div className="sir-header__search">
+              <span className="sir-header__search-icon">search</span>
+              <input
+                type="text"
+                placeholder="Pesquisar vagas, candidatos, competências..."
+                className="sir-header__input"
+              />
+              <span className="sir-header__kbd">Ctrl+K</span>
+            </div>
+
+            <div className="sir-header__pill">
+              <span className="sir-header__pill-dot" />
+              <span>Fluxo SIR Ativo</span>
+            </div>
+          </div>
+
+          {/* Direita: Transparência IA + notificações */}
+          <div className="sir-header__actions">
+            <button type="button" className="sir-header__btn">
+              <span className="sir-header__icon" style={{ fontSize: 18 }}>
+                help_outline
+              </span>
+              <span>Transparência IA</span>
+            </button>
+
+            <button type="button" className="sir-header__btn sir-header__btn-icon">
+              <span className="sir-header__icon">notifications</span>
+              <span className="sir-header__badge">3</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Main */}
+        <main className="sir-content">
+          <div className="sir-content__inner">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
