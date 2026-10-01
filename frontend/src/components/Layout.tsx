@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import "./Layout.css";
 
@@ -11,6 +11,19 @@ const NAV_ITEMS = [
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const pageTitle = pathname === "/"
+    ? "Painel"
+    : pathname === "/jobs/new"
+    ? "Nova vaga"
+    : pathname.includes("/applications/")
+    ? "Perfil do candidato"
+    : pathname.startsWith("/jobs/")
+    ? "Detalhe da vaga"
+    : pathname.startsWith("/jobs")
+    ? "Vagas"
+    : "Integração de e-mail";
 
   function handleLogout() {
     logout();
@@ -100,43 +113,28 @@ export function Layout() {
       <div className="sir-main">
         {/* Header */}
         <header className="sir-header">
-          {/* Esquerda: pesquisa + chip */}
-          <div className="sir-header__search-wrap">
-            <div className="sir-header__search">
-              <span className="sir-header__search-icon">search</span>
-              <input
-                type="text"
-                placeholder="Pesquisar vagas, candidatos, competências..."
-                className="sir-header__input"
-              />
-              <span className="sir-header__kbd">Ctrl+K</span>
-            </div>
-
-            <div className="sir-header__pill">
-              <span className="sir-header__pill-dot" />
-              <span>Fluxo SIR Ativo</span>
-            </div>
+          <div className="sir-header__heading">
+            <span className="sir-header__eyebrow">SIR · Recrutamento</span>
+            <h2 className="sir-header__title">{pageTitle}</h2>
           </div>
 
-          {/* Direita: Transparência IA + notificações */}
           <div className="sir-header__actions">
-            <button type="button" className="sir-header__btn">
-              <span className="sir-header__icon" style={{ fontSize: 18 }}>
-                help_outline
-              </span>
-              <span>Transparência IA</span>
-            </button>
-
-            <button type="button" className="sir-header__btn sir-header__btn-icon">
-              <span className="sir-header__icon">notifications</span>
-              <span className="sir-header__badge">3</span>
-            </button>
+            <div className="sir-header__pill">
+              <span className="sir-header__pill-dot" />
+              <span>Operação ativa</span>
+            </div>
+            {pathname !== "/jobs/new" && (
+              <Link to="/jobs/new" className="sir-header__new-job">
+                <span className="material-symbols-outlined" aria-hidden="true">add</span>
+                <span>Nova vaga</span>
+              </Link>
+            )}
           </div>
         </header>
 
         {/* Main */}
         <main className="sir-content">
-          <div className="sir-content__inner">
+            <div className="sir-content__inner" key={pathname}>
             <Outlet />
           </div>
         </main>

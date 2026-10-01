@@ -35,7 +35,7 @@ export function JobDetailPage() {
   const [questionnaireDirty, setQuestionnaireDirty] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: job } = useQuery({
+  const { data: job, isLoading, isError, refetch } = useQuery({
     queryKey: ["job", jobId],
     queryFn: async () => (await api.get<JobDetail>(`/jobs/${jobId}`)).data,
   });
@@ -49,7 +49,25 @@ export function JobDetailPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
   });
 
-  if (!job) return <p className="jd-card__state">A carregar...</p>;
+  if (isLoading) {
+    return (
+      <div className="jd-loading" role="status" aria-label="A carregar vaga">
+        <span className="jd-loading__bar jd-loading__bar--title" />
+        <span className="jd-loading__bar jd-loading__bar--meta" />
+        <span className="jd-loading__panel" />
+      </div>
+    );
+  }
+
+  if (isError || !job) {
+    return (
+      <div className="jd-load-error" role="alert">
+        <span className="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+        <p>Não foi possível carregar esta vaga.</p>
+        <button type="button" onClick={() => void refetch()}>Tentar novamente</button>
+      </div>
+    );
+  }
 
   return (
     <div className="job-detail">
@@ -65,25 +83,32 @@ export function JobDetailPage() {
           {job.status === "draft" && (
             <button
               onClick={() => publishMutation.mutate()}
+              disabled={publishMutation.isPending}
               className="jd-btn jd-btn--primary"
             >
-              Publicar vaga
+              {publishMutation.isPending ? "A publicar..." : "Publicar vaga"}
             </button>
           )}
           {job.status === "published" && (
             <button
               onClick={() => closeMutation.mutate()}
+              disabled={closeMutation.isPending}
               className="jd-btn jd-btn--secondary"
             >
-              Encerrar vaga
+              {closeMutation.isPending ? "A encerrar..." : "Encerrar vaga"}
             </button>
           )}
         </div>
       </div>
 
       {publishMutation.isError && (
-        <p className="job-detail__error">
+        <p className="job-detail__error" role="alert">
           {apiErrorMessage(publishMutation.error, "Não foi possível publicar a vaga.")}
+        </p>
+      )}
+      {closeMutation.isError && (
+        <p className="job-detail__error" role="alert">
+          {apiErrorMessage(closeMutation.error, "Não foi possível encerrar a vaga.")}
         </p>
       )}
 

@@ -153,7 +153,7 @@ export function JobCreatePage({
           </Field>
         </div>
 
-        {error && <p className="job-create__error">{error}</p>}
+        {error && <p className="job-create__error" role="alert">{error}</p>}
 
         <div className="job-create__actions">
           <button
@@ -161,11 +161,12 @@ export function JobCreatePage({
             disabled={isSubmitting}
             className="job-create__submit"
           >
-            {isSubmitting
-              ? "A guardar..."
-              : job
-              ? "Guardar alterações"
-              : "Criar vaga"}
+            {isSubmitting && (
+              <span className="material-symbols-outlined job-create__spinner" aria-hidden="true">
+                progress_activity
+              </span>
+            )}
+            {isSubmitting ? "A guardar..." : job ? "Guardar alterações" : "Criar vaga"}
           </button>
         </div>
       </form>

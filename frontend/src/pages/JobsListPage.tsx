@@ -16,7 +16,7 @@ export function JobsListPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<JobStatus | "">("");
 
-  const { data: jobs, isLoading } = useQuery({
+  const { data: jobs, isLoading, isError, refetch } = useQuery({
     queryKey: ["jobs", search, statusFilter],
     queryFn: async () => {
       const params: Record<string, string> = {};
@@ -62,10 +62,31 @@ export function JobsListPage() {
       </div>
 
       <div className="jobs-list">
-        {isLoading && <p className="jobs-list__state">A carregar...</p>}
+        {isLoading && (
+          <div className="jobs-list__loading" role="status" aria-label="A carregar vagas">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div className="jobs-list__loading-item" key={index}>
+                <span className="jobs-list__skeleton jobs-list__skeleton--title" />
+                <span className="jobs-list__skeleton jobs-list__skeleton--meta" />
+                <span className="jobs-list__skeleton jobs-list__skeleton--status" />
+              </div>
+            ))}
+          </div>
+        )}
 
-        {!isLoading && jobs?.length === 0 && (
-          <p className="jobs-list__state">Nenhuma vaga encontrada.</p>
+        {isError && (
+          <div className="jobs-list__state jobs-list__state--error" role="alert">
+            <span className="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+            <p>Não foi possível carregar as vagas.</p>
+            <button type="button" onClick={() => void refetch()}>Tentar novamente</button>
+          </div>
+        )}
+
+        {!isLoading && !isError && jobs?.length === 0 && (
+          <div className="jobs-list__state">
+            <span className="material-symbols-outlined" aria-hidden="true">search_off</span>
+            <p>Nenhuma vaga encontrada com estes filtros.</p>
+          </div>
         )}
 
         {jobs?.map((job) => (

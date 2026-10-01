@@ -53,12 +53,22 @@ function MetricCard({ icon, label, value, tone = "default" }: MetricCardProps) {
 /* ==================== Page ==================== */
 
 export function DashboardPage() {
-  const { data: summary } = useQuery({
+  const {
+    data: summary,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+    refetch: refetchSummary,
+  } = useQuery({
     queryKey: ["dashboard-summary"],
     queryFn: async () => (await api.get<Summary>("/dashboard/summary")).data,
   });
 
-  const { data: byJob } = useQuery({
+  const {
+    data: byJob,
+    isLoading: isByJobLoading,
+    isError: isByJobError,
+    refetch: refetchByJob,
+  } = useQuery({
     queryKey: ["dashboard-by-job"],
     queryFn: async () =>
       (await api.get<JobApplicationCount[]>("/dashboard/applications-by-job")).data,
@@ -68,14 +78,38 @@ export function DashboardPage() {
     <div className="sir-dash">
       {/* ===== Header ===== */}
       <div className="sir-dash__header">
-        <span className="sir-dash__eyebrow">Visão geral</span>
-        <h1 className="sir-dash__title">Painel</h1>
-        <p className="sir-dash__subtitle">
-          Visão geral da triagem de candidatos.
-        </p>
+        <div>
+          <span className="sir-dash__eyebrow">Visão geral</span>
+          <h1 className="sir-dash__title">Painel</h1>
+          <p className="sir-dash__subtitle">
+            Acompanhe o ritmo das candidaturas e avance com os melhores perfis.
+          </p>
+        </div>
+        <Link to="/jobs/new" className="sir-dash__primary-action">
+          <span className="material-symbols-outlined" aria-hidden="true">add</span>
+          Nova vaga
+        </Link>
       </div>
 
       {/* ===== Métricas ===== */}
+      {isSummaryLoading && (
+        <div className="sir-dash__metrics" aria-label="A carregar indicadores" role="status">
+          {Array.from({ length: 8 }, (_, index) => (
+            <div className="sir-metric sir-metric--loading" key={index}>
+              <span className="sir-skeleton sir-skeleton--icon" />
+              <span className="sir-skeleton sir-skeleton--value" />
+              <span className="sir-skeleton sir-skeleton--label" />
+            </div>
+          ))}
+        </div>
+      )}
+      {isSummaryError && (
+        <div className="sir-dash__alert" role="alert">
+          <span className="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>Não foi possível carregar os indicadores.</span>
+          <button type="button" onClick={() => void refetchSummary()}>Tentar novamente</button>
+        </div>
+      )}
       {summary && (
         <div className="sir-dash__metrics">
           <MetricCard icon="work"            label="Vagas ativas"     value={summary.active_jobs} tone="info" />
@@ -104,7 +138,24 @@ export function DashboardPage() {
           )}
         </div>
 
-        {byJob && byJob.length > 0 ? (
+        {isByJobLoading ? (
+          <div className="sir-table__loading" aria-label="A carregar vagas" role="status">
+            {Array.from({ length: 4 }, (_, index) => (
+              <div className="sir-table__loading-row" key={index}>
+                <span className="sir-skeleton sir-skeleton--job" />
+                <span className="sir-skeleton sir-skeleton--number" />
+                <span className="sir-skeleton sir-skeleton--number" />
+                <span className="sir-skeleton sir-skeleton--action" />
+              </div>
+            ))}
+          </div>
+        ) : isByJobError ? (
+          <div className="sir-empty sir-empty--error" role="alert">
+            <span className="sir-empty__icon">error</span>
+            <p className="sir-empty__text">Não foi possível carregar as candidaturas por vaga.</p>
+            <button type="button" onClick={() => void refetchByJob()}>Tentar novamente</button>
+          </div>
+        ) : byJob && byJob.length > 0 ? (
           <div className="sir-table-wrap">
             <table className="sir-table">
               <thead>
@@ -167,6 +218,7 @@ export function DashboardPage() {
           <div className="sir-empty">
             <span className="sir-empty__icon">inbox</span>
             <p className="sir-empty__text">Ainda não há vagas com candidaturas.</p>
+            <Link to="/jobs" className="sir-empty__link">Explorar vagas</Link>
           </div>
         )}
       </div>

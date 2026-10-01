@@ -20,8 +20,10 @@ export function EmailSettingsPage() {
     email_address: "", imap_host: "", imap_port: 993, imap_password: "", oauth_access_token: "",
   });
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [actionFailed, setActionFailed] = useState(false);
 
-  const { data: account, error } = useQuery({
+  const { data: account, error, isLoading, isError, refetch } = useQuery({
     queryKey: ["email-status"],
     queryFn: async () => (await api.get<EmailAccountRead>("/email/status")).data,
     retry: false,
@@ -36,34 +38,92 @@ export function EmailSettingsPage() {
         ? { imap_host: form.imap_host, imap_port: form.imap_port, imap_password: form.imap_password }
         : { oauth_access_token: form.oauth_access_token }),
     }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["email-status"] }),
-    onError: (err) => setConnectError(apiErrorMessage(err, "Não foi possível ligar a conta.")),
+    onSuccess: () => {
+      setActionNotice("Conta de e-mail ligada com sucesso.");
+      setActionFailed(false);
+      queryClient.invalidateQueries({ queryKey: ["email-status"] });
+    },
+    onError: (err) => {
+      const message = apiErrorMessage(err, "Não foi possível ligar a conta.");
+      setConnectError(message);
+      setActionNotice(message);
+      setActionFailed(true);
+    },
   });
 
   const syncMutation = useMutation({
     mutationFn: () => api.post("/email/sync"),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["email-status"] }),
+    onSuccess: () => {
+      setActionNotice("Sincronização iniciada.");
+      setActionFailed(false);
+      queryClient.invalidateQueries({ queryKey: ["email-status"] });
+    },
+    onError: (err) => {
+      setActionNotice(apiErrorMessage(err, "Não foi possível iniciar a sincronização."));
+      setActionFailed(true);
+    },
   });
 
   const disconnectMutation = useMutation({
     mutationFn: () => api.delete("/email/disconnect"),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["email-status"] }),
+    onSuccess: () => {
+      setActionNotice("Conta desligada.");
+      setActionFailed(false);
+      queryClient.invalidateQueries({ queryKey: ["email-status"] });
+    },
+    onError: (err) => {
+      setActionNotice(apiErrorMessage(err, "Não foi possível desligar a conta."));
+      setActionFailed(true);
+    },
   });
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setConnectError(null);
+    setActionNotice(null);
     connectMutation.mutate();
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="email-settings max-w-2xl">
       <h1 className="font-display text-2xl text-ink mb-1">Integração de e-mail</h1>
       <p className="text-ink-soft mb-6">
         Ligue a caixa de entrada usada para receber candidaturas (ex: recrutamento@empresa.co.mz).
       </p>
 
-      {account && account.status !== "disconnected" && (
+      {actionNotice && (
+        <p
+          className={`mb-4 rounded-md border px-4 py-3 text-sm ${
+            actionFailed
+              ? "border-danger/20 bg-danger-soft text-danger-ink"
+              : "border-success-border bg-success-soft text-success-ink"
+          }`}
+          role={actionFailed ? "alert" : "status"}
+          aria-live="polite"
+        >
+          {actionNotice}
+        </p>
+      )}
+
+      {isLoading && (
+        <div className="mb-6 space-y-4 rounded-lg border border-line bg-surface p-6" role="status" aria-label="A carregar estado do e-mail">
+          <span className="block h-5 w-48 animate-pulse rounded bg-ink/10" />
+          <span className="block h-4 w-28 animate-pulse rounded bg-ink/5" />
+          <span className="block h-16 animate-pulse rounded bg-ink/5" />
+          <span className="block h-9 w-36 animate-pulse rounded bg-ink/10" />
+        </div>
+      )}
+
+      {isError && !notConnected && (
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-md border border-danger/20 bg-danger-soft p-4 text-sm text-danger-ink" role="alert">
+          <span>Não foi possível consultar o estado da integração.</span>
+          <button type="button" onClick={() => void refetch()} className="font-semibold underline underline-offset-2">
+            Tentar novamente
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !isError && account && account.status !== "disconnected" && (
         <div className="bg-surface border border-line rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -79,7 +139,7 @@ export function EmailSettingsPage() {
             <p className="text-sm text-danger bg-danger-soft rounded-sm px-3 py-2 mb-4">{account.last_sync_error}</p>
           )}
 
-          <div className="grid grid-cols-4 gap-4 text-sm mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-4">
             <div><p className="font-display text-xl text-ink">{account.messages_processed_count}</p><p className="text-ink-faint">Mensagens</p></div>
             <div><p className="font-display text-xl text-ink">{account.cvs_found_count}</p><p className="text-ink-faint">CVs encontrados</p></div>
             <div><p className="font-display text-xl text-ink">{account.cvs_analyzed_count}</p><p className="text-ink-faint">CVs analisados</p></div>
@@ -100,15 +160,16 @@ export function EmailSettingsPage() {
             </button>
             <button
               onClick={() => disconnectMutation.mutate()}
+              disabled={disconnectMutation.isPending}
               className="rounded-sm border border-line px-4 py-2 text-sm font-medium text-ink-soft hover:bg-canvas"
             >
-              Desligar
+              {disconnectMutation.isPending ? "A desligar..." : "Desligar"}
             </button>
           </div>
         </div>
       )}
 
-      {(notConnected || account?.status === "disconnected") && (
+      {!isLoading && (notConnected || (!isError && account?.status === "disconnected")) && (
         <form onSubmit={handleSubmit} className="bg-surface border border-line rounded-lg p-6 space-y-4">
           <label className="block text-sm">
             <span className="block text-ink-soft mb-1">E-mail da empresa</span>
