@@ -19,6 +19,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+# Application source, not Python packaging output.
+!/frontend/src/lib/
+!/frontend/src/lib/**
 lib64/
 parts/
 sdist/

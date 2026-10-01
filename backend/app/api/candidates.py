@@ -1,9 +1,8 @@
 """
 Router de candidatos e candidaturas.
 
-Nesta fase (Backend + BD), o upload de CV apenas valida, armazena o ficheiro
-e regista os metadados. A extração de texto/NLP e o cálculo de score
-(secções 14-19 do prompt mestre) ficam para a fase de IA/Matching.
+O upload valida e armazena o ficheiro e coloca a análise na fila do worker
+quando o fornecedor de IA e os requisitos da vaga estão configurados.
 """
 import uuid
 import hashlib
@@ -24,6 +23,9 @@ from app.schemas.candidate import CandidateRead, ApplicationRead, ApplicationDet
 from app.api.deps import get_current_user, require_recruiter
 from app.schemas.candidate import CandidateCreate
 from app.services.documents import validate_document, MIME
+from app.services.automatic_analysis import enqueue_uploaded_resume
+from app.services.analysis_overview import overview
+from app.services.candidate_identity import extract_candidate_identity, UNKNOWN_NAME
 
 router = APIRouter(tags=["Candidatos e Candidaturas"])
 
@@ -45,7 +47,8 @@ def _find_or_create_candidate(db: Session, name: str, email: str, phone: str | N
     candidate = db.query(Candidate).filter(Candidate.email == email, Candidate.company_id == company_id).first()
     if candidate:
         # Atualiza dados básicos caso tenham mudado, sem apagar histórico
-        candidate.name = name or candidate.name
+        if name and name != UNKNOWN_NAME:
+            candidate.name = name
         candidate.phone = phone or candidate.phone
         candidate.location = location or candidate.location
         return candidate
@@ -64,8 +67,8 @@ def _find_or_create_candidate(db: Session, name: str, email: str, phone: str | N
 )
 async def upload_cv(
     job_id: int,
-    candidate_name: str = Form(...),
-    candidate_email: str = Form(...),
+    candidate_name: str | None = Form(default=None),
+    candidate_email: str | None = Form(default=None),
     candidate_phone: str | None = Form(default=None),
     candidate_location: str | None = Form(default=None),
     file: UploadFile = File(...),
@@ -89,12 +92,20 @@ async def upload_cv(
             detail=f"Ficheiro excede o limite de {settings.MAX_UPLOAD_SIZE_MB}MB",
         )
 
+    validate_document(contents, extension)
     try:
-        identity = CandidateCreate(name=candidate_name.strip(), email=candidate_email.strip().lower(),
+        extracted_name, extracted_email = extract_candidate_identity(contents, extension)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from None
+    email = extracted_email or (candidate_email or "").strip().lower()
+    if not email:
+        raise HTTPException(422, "Não foi possível identificar o e-mail no CV. Envie um PDF/DOCX com o e-mail de contacto em texto legível.")
+    try:
+        identity = CandidateCreate(name=extracted_name or (candidate_name or "").strip() or UNKNOWN_NAME,
+                                   email=email,
                                    phone=candidate_phone, location=candidate_location)
     except ValidationError:
         raise HTTPException(422, "Nome ou e-mail inválido")
-    validate_document(contents, extension)
     digest = hashlib.sha256(contents).hexdigest()
     stored_path = None
     committed = False
@@ -110,20 +121,24 @@ async def upload_cv(
             db.flush()
         if any(resume.sha256 == digest for resume in application.resumes):
             db.commit()
-            return application
+            return ApplicationDetailRead.model_validate(application).model_copy(update=overview(db, application))
         version = max((resume.version for resume in application.resumes), default=0) + 1
         upload_dir = Path(settings.UPLOAD_DIR).resolve() / str(job.id)
         upload_dir.mkdir(parents=True, exist_ok=True)
         stored_path = upload_dir / f"{uuid.uuid4().hex}{extension}"
         stored_path.write_bytes(contents)
-        db.add(Resume(application_id=application.id, original_filename=Path(file.filename or "cv").name[:255],
+        resume = Resume(application_id=application.id, original_filename=Path(file.filename or "cv").name[:255],
             stored_path=str(stored_path), content_type=MIME[extension], file_size_bytes=len(contents),
-            sha256=digest, version=version))
+            sha256=digest, version=version)
+        db.add(resume)
+        db.flush()
         application.analysis_status = "pending"
+        if enqueue_uploaded_resume(db, job, current_user, resume):
+            application.analysis_status = "queued"
         db.commit()
         committed = True
         db.refresh(application)
-        return application
+        return ApplicationDetailRead.model_validate(application).model_copy(update=overview(db, application))
     except Exception:
         db.rollback()
         if stored_path is not None and not committed:

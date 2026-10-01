@@ -11,7 +11,17 @@ globalThis.window = new EventTarget();
 const source = await readFile(new URL('../src/lib/api.ts', import.meta.url), 'utf8');
 const compiled = await transform(source, { loader: 'ts', format: 'esm' });
 const module = compiled.code.replace('"axios"', JSON.stringify(import.meta.resolve('axios')));
-const { api, tokenStorage, refreshSession } = await import('data:text/javascript;base64,' + Buffer.from(module).toString('base64'));
+const { api, tokenStorage, refreshSession, apiErrorMessage } = await import('data:text/javascript;base64,' + Buffer.from(module).toString('base64'));
+
+test('upload errors preserve validation details and explain connection failures', () => {
+  const validation = new axios.AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined,
+    { status: 422, data: { detail: 'Não foi possível identificar o e-mail no CV.' } });
+  assert.equal(apiErrorMessage(validation), 'Não foi possível identificar o e-mail no CV.');
+  assert.match(apiErrorMessage(new axios.AxiosError('Network Error', 'ERR_NETWORK')), /contactar o servidor/);
+  assert.match(apiErrorMessage(new axios.AxiosError('timeout', 'ECONNABORTED')), /verificar se o pedido foi guardado/);
+  assert.match(apiErrorMessage(new axios.AxiosError('Internal Server Error', 'ERR_BAD_RESPONSE', undefined, undefined,
+    { status: 500, data: {} })), /servidor encontrou um erro/);
+});
 
 test('expired /auth/me renews once and concurrent failures all settle', async () => {
   tokenStorage.clear();

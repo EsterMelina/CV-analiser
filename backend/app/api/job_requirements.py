@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from pathlib import Path
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -8,8 +9,44 @@ from app.models.user import User, UserRole
 from app.schemas.job_requirement import JobRequirementCreate, JobRequirementUpdate, JobRequirementRead
 from app.api.deps import get_current_user, require_recruiter
 from app.services.criteria import preserve, changed
+from app.services.requirement_import import parse_requirements, MAX_TXT_BYTES
 
 router = APIRouter(tags=["Requisitos de Vaga"])
+
+
+@router.post("/api/jobs/{job_id}/requirements/import", status_code=201,
+             dependencies=[Depends(require_recruiter)])
+async def import_requirements(job_id: int, file: UploadFile = File(...),
+                              db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    job = _get_owned_job(job_id, db, current_user)
+    if Path(file.filename or "").suffix.lower() != ".txt":
+        raise HTTPException(400, "Seleccione um ficheiro .txt.")
+    contents = await file.read(MAX_TXT_BYTES + 1)
+    if len(contents) > MAX_TXT_BYTES:
+        raise HTTPException(413, "O TXT excede o limite de 100 KB.")
+    values = parse_requirements(contents)
+    db.query(Job).filter(Job.id == job.id).with_for_update().one()
+    db.expire(job, ["requirements"])
+    def key(value):
+        return " ".join(value.casefold().split())
+    existing = {key(r.description if r.description and len(r.description) > 150
+                    and r.name == r.description[:150] else r.name) for r in job.requirements}
+    additions = [value for value in values if key(value) not in existing]
+    if len(job.requirements) + len(additions) > 100:
+        raise HTTPException(422, "A vaga pode ter no máximo 100 requisitos nesta importação.")
+    if not additions:
+        return {"imported": 0, "skipped": len(values), "requirements": []}
+    preserve(db, job, current_user.id)
+    # Keep existing weights; use the manual form's default when appending.
+    weight = 0.1 if job.requirements else 1 / len(additions)
+    requirements = [JobRequirement(job_id=job.id, name=value[:150],
+                    description=value if len(value) > 150 else None, weight=weight)
+                    for value in additions]
+    db.add_all(requirements)
+    changed(db, job, current_user.id)
+    db.commit()
+    return {"imported": len(requirements), "skipped": len(values) - len(additions),
+            "requirements": [JobRequirementRead.model_validate(r) for r in requirements]}
 
 
 def _get_owned_job(job_id: int, db: Session, current_user: User) -> Job:

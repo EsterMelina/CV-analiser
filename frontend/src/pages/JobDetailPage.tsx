@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, apiErrorMessage } from "@/lib/api";
@@ -178,6 +178,16 @@ function OverviewTab({ job }: { job: JobDetail }) {
 
 function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
   const queryClient = useQueryClient();
+  const [requirementsFile, setRequirementsFile] = useState<File | null>(null);
+  const importMutation = useMutation({
+    mutationFn: async () => {
+      if (!requirementsFile) throw new Error("Seleccione um TXT.");
+      const data = new FormData();
+      data.append("file", requirementsFile);
+      return (await api.post<{ imported: number; skipped: number }>(`/jobs/${jobId}/requirements/import`, data)).data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job", jobId] }),
+  });
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({
@@ -218,6 +228,27 @@ function RequirementsTab({ job, jobId }: { job: JobDetail; jobId: string }) {
 
   return (
     <div>
+      <form className="jd-form" onSubmit={(event) => { event.preventDefault(); importMutation.mutate(); }}>
+        <label className="jd-field">
+          <span>Importar requisitos de TXT</span>
+          <input type="file" accept=".txt,text/plain" disabled={importMutation.isPending}
+            onChange={(event) => { setRequirementsFile(event.target.files?.[0] ?? null); importMutation.reset(); }} />
+        </label>
+        <p style={{ gridColumn: "1 / -1" }}>Um requisito por linha, até 100 KB. Os requisitos existentes são mantidos e os repetidos são ignorados. Após importar, reveja as categorias, pesos e requisitos obrigatórios.</p>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <a className="jd-btn jd-btn--ghost" href={`${import.meta.env.BASE_URL}modelo-requisitos.txt`} download="modelo-requisitos.txt">Descarregar modelo TXT</a>
+          <p>Abra o modelo, substitua os exemplos pelos requisitos da sua vaga e guarde o ficheiro. Depois seleccione-o acima e clique em Importar TXT.</p>
+        </div>
+        <details style={{ gridColumn: "1 / -1" }}><summary>Exemplo de conteúdo do TXT</summary>
+          <pre>{"Licenciatura em Informática\nExperiência de 2 anos com Python\nConhecimentos de PostgreSQL\nInglês avançado"}</pre>
+          <p>Categoria inicial: Outros; nível: Intermédio; obrigatoriedade: Não. Numa vaga sem requisitos, os pesos são iguais e somam 100%. Ao acrescentar requisitos, cada novo item recebe peso 10%.</p>
+        </details>
+        <button className="jd-btn jd-btn--primary" type="submit" disabled={!requirementsFile || importMutation.isPending}>
+          {importMutation.isPending ? "A importar..." : "Importar TXT"}
+        </button>
+        {importMutation.error && <p className="jd-alert" role="alert">{apiErrorMessage(importMutation.error, "Não foi possível importar o TXT.")}</p>}
+        {importMutation.isSuccess && <p role="status">{importMutation.data.imported} requisito(s) importado(s); {importMutation.data.skipped} já existente(s). Pode editá-los abaixo.</p>}
+      </form>
       <div className="jd-card__toolbar">
         <p className="jd-overview__label">
           Soma dos pesos:{" "}
@@ -386,8 +417,8 @@ function CandidatesTab({ jobId }: { jobId: string }) {
   const queryClient = useQueryClient();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [candidateName, setCandidateName] = useState("");
-  const [candidateEmail, setCandidateEmail] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const uploadInFlight = useRef(false);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [pendingAnalysisIds, setPendingAnalysisIds] = useState<number[]>([]);
@@ -421,27 +452,50 @@ function CandidatesTab({ jobId }: { jobId: string }) {
       setPendingAnalysisIds((prev) => prev.filter((id) => id !== resumeId)),
   });
 
+  function selectCV(selected: File | null) {
+    setUploadSuccess(null);
+    setUploadError(null);
+    if (selected && !/\.(pdf|docx)$/i.test(selected.name)) {
+      setFile(null);
+      setUploadError("Formato não suportado. Seleccione um PDF ou DOCX.");
+      return;
+    }
+    if (selected && selected.size === 0) {
+      setFile(null);
+      setUploadError("O ficheiro está vazio. Seleccione outro CV.");
+      return;
+    }
+    setFile(selected);
+  }
+
   async function handleUpload(e: FormEvent) {
     e.preventDefault();
-    if (!file) return;
+    if (uploadInFlight.current) return;
+    if (!file) {
+      setUploadError("Seleccione ou arraste um CV antes de clicar em Carregar.");
+      return;
+    }
+    uploadInFlight.current = true;
     setUploadError(null);
+    setUploadSuccess(null);
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("candidate_name", candidateName);
-      formData.append("candidate_email", candidateEmail);
       formData.append("file", file);
-      await api.post(`/jobs/${jobId}/cvs`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      queryClient.invalidateQueries({ queryKey: ["job-candidates", jobId] });
-      setCandidateName("");
-      setCandidateEmail("");
+      const { data } = await api.post<ApplicationDetail>(`/jobs/${jobId}/cvs`, formData);
+      const key = ["job-candidates", jobId];
+      await queryClient.cancelQueries({ queryKey: key });
+      queryClient.setQueryData<ApplicationDetail[]>(key, (previous = []) =>
+        [data, ...previous.filter((application) => application.id !== data.id)]);
+      void queryClient.invalidateQueries({ queryKey: key });
+      void queryClient.invalidateQueries({ queryKey: ["job-ranking", jobId] });
+      setUploadSuccess(`CV guardado na candidatura de ${data.candidate.name} (${data.candidate.email}). ${data.analysis_status === "queued" ? "Análise em fila." : "Consulte o estado da análise na lista abaixo."}`);
       setFile(null);
       setUploadOpen(false);
     } catch (err) {
       setUploadError(apiErrorMessage(err, "Não foi possível carregar o CV."));
     } finally {
+      uploadInFlight.current = false;
       setIsUploading(false);
     }
   }
@@ -449,47 +503,39 @@ function CandidatesTab({ jobId }: { jobId: string }) {
   return (
     <div>
       <div className="jd-card__toolbar" style={{ justifyContent: "flex-end" }}>
-        <button className="jd-btn jd-btn--ghost" onClick={() => setUploadOpen((v) => !v)}>
+        <button className="jd-btn jd-btn--ghost" disabled={isUploading} onClick={() => { setFile(null); setUploadOpen((v) => !v); }}>
           {uploadOpen ? "Cancelar" : "+ Carregar CV"}
         </button>
       </div>
 
+      {uploadError && <p role="alert" className="jd-alert">{uploadError}</p>}
+      {uploadSuccess && <p role="status" className="jd-upload-status">{uploadSuccess}</p>}
+
       {uploadOpen && (
-        <form onSubmit={handleUpload} className="jd-form jd-form--3col">
+        <form noValidate onSubmit={handleUpload} className="jd-form jd-form--3col"
+          aria-busy={isUploading}
+          onDragOver={(event) => { event.preventDefault(); }}
+          onDrop={(event) => {
+            event.preventDefault();
+            if (isUploading) return;
+            if (event.dataTransfer.files.length !== 1) {
+              setUploadError("Arraste apenas um CV de cada vez.");
+              return;
+            }
+            selectCV(event.dataTransfer.files[0]);
+          }}>
+          <p style={{ gridColumn: "1 / -1" }}>O nome e o e-mail serão lidos automaticamente do CV. Inclua um único e-mail de contacto do candidato em texto legível. Se o nome não for identificado, aparecerá como “Nome não identificado”.</p>
           <label className="jd-field">
-            <span>Nome do candidato</span>
+            <span>Seleccione ou arraste aqui o CV (PDF ou DOCX)</span>
             <input
-              required
-              value={candidateName}
-              onChange={(e) => setCandidateName(e.target.value)}
-              className="jd-input"
-            />
-          </label>
-          <label className="jd-field">
-            <span>E-mail</span>
-            <input
-              required
-              type="email"
-              value={candidateEmail}
-              onChange={(e) => setCandidateEmail(e.target.value)}
-              className="jd-input"
-            />
-          </label>
-          <label className="jd-field">
-            <span>Ficheiro (PDF ou DOCX)</span>
-            <input
-              required
+              disabled={isUploading}
               type="file"
               accept=".pdf,.docx"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => selectCV(e.target.files?.[0] ?? null)}
               className="jd-input"
             />
           </label>
-          {uploadError && (
-            <p className="jd-alert" style={{ gridColumn: "1 / -1" }}>
-              {uploadError}
-            </p>
-          )}
+          <p role="status" style={{ gridColumn: "1 / -1" }}>{isUploading ? "A enviar e validar o CV. Aguarde a confirmação." : file ? `Seleccionado: ${file.name}. Clique em Carregar para enviar.` : "Nenhum ficheiro seleccionado."}</p>
           <button type="submit" disabled={isUploading} className="jd-btn jd-btn--primary">
             {isUploading ? "A carregar..." : "Carregar"}
           </button>

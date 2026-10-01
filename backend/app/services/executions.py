@@ -19,7 +19,7 @@ def execution_timeout():
     return 2 * settings.AI_TIMEOUT_SECONDS + 30 if settings.AI_PROVIDER in {"ollama", "openai-compatible"} else 55
 
 
-def enqueue(db, job, user, key, kind, payload):
+def enqueue(db, job, user, key, kind, payload, *, commit=True):
     if not key or len(key) > 100:
         raise HTTPException(422, "Idempotency-Key obrigatório, até 100 caracteres")
     encoded = json.dumps({"kind": kind, "payload": payload}, sort_keys=True, ensure_ascii=False)
@@ -34,6 +34,10 @@ def enqueue(db, job, user, key, kind, payload):
         prompt_version=PROMPT_VERSION,
         payload_hash=digest, payload_json=json.dumps(payload, ensure_ascii=False))
     db.add(execution)
+    if not commit:
+        # The caller commits the document and its queued analysis atomically.
+        db.flush()
+        return execution
     try:
         db.commit()
     except IntegrityError:

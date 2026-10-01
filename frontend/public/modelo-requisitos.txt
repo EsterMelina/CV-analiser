@@ -1,0 +1,6 @@
+Licenciatura em Informática ou área relacionada
+Experiência mínima de 2 anos em desenvolvimento de software
+Conhecimentos de Python
+Experiência com bases de dados PostgreSQL
+Capacidade de trabalhar em equipa
+Boa comunicação escrita e oral em português

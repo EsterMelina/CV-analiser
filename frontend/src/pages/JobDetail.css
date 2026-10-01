@@ -208,7 +208,15 @@
   margin-bottom: 1rem;
 }
 
-.jd-form--3col { grid-template-columns: repeat(3, 1fr); }
+  .jd-form--3col { grid-template-columns: repeat(3, 1fr); }
+
+  .jd-upload-status {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    background: #ecfdf5;
+    color: #065f46;
+  }
 
 .jd-field {
   display: flex;
